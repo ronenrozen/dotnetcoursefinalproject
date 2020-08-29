@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using FinalProjectDotNet.Data;
+using Server.Data;
 
 
 namespace FinalProjectDotNet
@@ -30,6 +31,9 @@ namespace FinalProjectDotNet
 
             services.AddDbContext<PlayerDataContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("PlayerDataContext")));
+
+            services.AddDbContext<GameDataContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("GameDataContext")));
 
         }
 
@@ -57,6 +61,7 @@ namespace FinalProjectDotNet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }
