@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace Client
 {
-    public partial class Form1 : Form
+    public partial class Login : Form
     {
-        public Form1()
+        public Login()
         {
             InitializeComponent();
         }
@@ -31,7 +31,7 @@ namespace Client
         private void button1_Click(object sender, EventArgs e)
         {
             //if login details ok by the server
-            Form2 manueForm = new Form2();
+            HomePage manueForm = new HomePage();
             manueForm.ShowDialog();
         }
     }

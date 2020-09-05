@@ -1,6 +1,6 @@
 ﻿namespace Client
 {
-    partial class Form2
+    partial class HomePage
     {
         /// <summary>
         /// Required designer variable.
