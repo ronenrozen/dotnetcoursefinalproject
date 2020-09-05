@@ -33,8 +33,6 @@ namespace Client
         Cell[,] cells = new Cell[gridRows, gridCols];
         List<Piece> pieces = new List<Piece>();
 
-        //public int activePieceIndex = -1;
-        public Cell srcCell;
         enum StepType
         {
             MoveLeft,
@@ -43,11 +41,15 @@ namespace Client
             EatLeft
         }
 
+        //for dragg action
         private bool dragging = false;
         private Piece draggedPiece;
+        public Cell draggSrcCell;
         private (int, int) mouseOffsetFromPieceCenter;
+        
         private bool clientTurn = false;
         private string gameId;
+        
         public GameWindow()
         {
             InitializeComponent();
@@ -91,7 +93,7 @@ namespace Client
                 if (step == null)
                 {
                     //dropLocation out of bound or unvalid
-                    draggedPiece.Center = srcCell.Center;
+                    draggedPiece.Center = draggSrcCell.Center;
                     //update panel
                     RefreshPanel();
                 }
@@ -128,7 +130,7 @@ namespace Client
                         {
                             dragging = true;
                             draggedPiece = piece;
-                            srcCell = GetCellFromLocation(draggedPiece.Center);
+                            draggSrcCell = GetCellFromLocation(draggedPiece.Center);
                             mouseOffsetFromPieceCenter = (e.Location.X - draggedPiece.Center.X, e.Location.Y - draggedPiece.Center.Y);
                             break;
                         }
@@ -258,34 +260,34 @@ namespace Client
                 return null;
 
             //move forword right
-            if (targetCell.Row == srcCell.Row - 1 &&
-                targetCell.Col == srcCell.Col + 1)
+            if (targetCell.Row == draggSrcCell.Row - 1 &&
+                targetCell.Col == draggSrcCell.Col + 1)
             {
-                return new Step(draggedPiece.Id, srcCell.Row, srcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveRight.ToString());
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveRight.ToString());
             }
 
             //move forword left
-            if (targetCell.Row == srcCell.Row - 1 &&
-               targetCell.Col == srcCell.Col - 1)
+            if (targetCell.Row == draggSrcCell.Row - 1 &&
+               targetCell.Col == draggSrcCell.Col - 1)
             {
-                return new Step(draggedPiece.Id, srcCell.Row, srcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveLeft.ToString());
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveLeft.ToString());
             }
 
             //eat right
             if (
-                targetCell.Row == srcCell.Row - 2 &&
-                targetCell.Col == srcCell.Col + 2 &&
-                PieceColorFromCell(cells[srcCell.Row - 1, srcCell.Col + 1]) == Color.Black.ToString())
+                targetCell.Row == draggSrcCell.Row - 2 &&
+                targetCell.Col == draggSrcCell.Col + 2 &&
+                PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]) == Color.Black.ToString())
             {
-                return new Step(draggedPiece.Id, srcCell.Row, srcCell.Col, targetCell.Row, targetCell.Col, StepType.EatRight.ToString(), PieceIdFromCell(cells[srcCell.Row - 1, srcCell.Col + 1]));
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatRight.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]));
             }
 
             //eat left
-            if (targetCell.Row == srcCell.Row - 2 &&
-                targetCell.Col == srcCell.Col - 2 &&
-                 PieceColorFromCell(cells[srcCell.Row - 1, srcCell.Col - 1]) == Color.Black.ToString())
+            if (targetCell.Row == draggSrcCell.Row - 2 &&
+                targetCell.Col == draggSrcCell.Col - 2 &&
+                 PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]) == Color.Black.ToString())
             {
-                return new Step(draggedPiece.Id, srcCell.Row, srcCell.Col, targetCell.Row, targetCell.Col, StepType.EatLeft.ToString(), PieceIdFromCell(cells[srcCell.Row - 1, srcCell.Col - 1]));
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatLeft.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]));
             }
 
 
