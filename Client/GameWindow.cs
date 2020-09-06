@@ -111,13 +111,43 @@ namespace Client
                     //update panel
                     RefreshPanel();
                     //post step to server
-
+                    Step serverStep = getServerStep(step);
+                    //update piece
+                    UpdatePiecesByStep(serverStep);
+                    //add step to db
+                    clientTurn = true;
                 }
                 //update panel
                 RefreshPanel();
 
             }
         }
+
+        private Step getServerStep(Step step)
+        {
+            Step serverStep = PostStepToServerAsync(step).Result;
+            if (serverStep == null)
+            {
+                serverStep = PostStepToServerAsync(step).Result;
+                if (serverStep == null)
+                {
+                    throw new Exception("Couldnt retreive step from server");
+                }
+            }
+            return serverStep;
+            
+        }
+        private async Task<Step> PostStepToServerAsync(Step step)
+        {
+            HttpResponseMessage response = await client.PostAsJsonAsync("api/TblGames/step/"+ game.TblGame.Id, step);
+            if (response.IsSuccessStatusCode)
+            {
+                Step serverStep = await response.Content.ReadAsAsync<Step>();
+                return serverStep;
+            }
+            return null;
+        }
+
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left && clientTurn == true)

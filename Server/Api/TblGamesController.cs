@@ -15,7 +15,7 @@ namespace Server.Api
     public class TblGamesController : ControllerBase
     {
         private readonly GameDataContext _context;
-
+        private List<Game> games { get; set; }
         public TblGamesController(GameDataContext context)
         {
             _context = context;
@@ -83,7 +83,27 @@ namespace Server.Api
             _context.TblGames.Add(tblGames);
             await _context.SaveChangesAsync();
             Game g = new Game(tblGames);
+            games.Add(g);
             return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, g);
+        }
+        [Route("step/{gameId}")]
+        [HttpPost]
+        public async Task<ActionResult<TblGames>> PostStep(int gameId,Step step)
+        {
+            Game cuurentGame = games.Find(g => g.TblGame.Id == gameId);
+            updateCurrentGame(cuurentGame, step);
+            Step serverStep = calculateServerStep(cuurentGame);   
+            return CreatedAtAction("serverStep", serverStep);
+        }
+
+        private Step calculateServerStep(Game cuurentGame)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void updateCurrentGame(Game cuurentGame,Step step)
+        {
+            throw new NotImplementedException();
         }
 
         // DELETE: api/TblGames/5
