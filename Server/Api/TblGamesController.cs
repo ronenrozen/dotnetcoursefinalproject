@@ -82,8 +82,8 @@ namespace Server.Api
         {
             _context.TblGames.Add(tblGames);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, tblGames);
+            Game g = new Game(tblGames);
+            return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, g);
         }
 
         // DELETE: api/TblGames/5

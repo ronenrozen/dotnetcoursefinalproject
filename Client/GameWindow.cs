@@ -31,7 +31,7 @@ namespace Client
         ////////////////////////////////////////
         
         Cell[,] cells = new Cell[gridRows, gridCols];
-        List<Piece> pieces = new List<Piece>();
+        List<GraphicsPiece> gPieces = new List<GraphicsPiece>();
 
         enum StepType
         {
@@ -43,21 +43,26 @@ namespace Client
 
         //for dragg action
         private bool dragging = false;
-        private Piece draggedPiece;
+        private GraphicsPiece draggedPiece;
         public Cell draggSrcCell;
         private (int, int) mouseOffsetFromPieceCenter;
         
         private bool clientTurn = false;
-        private string gameId;
-        
-        public GameWindow()
+        private Game game;
+        public GameWindow(Game g)
         {
+            game = g;
+            List<Piece> pieces = g.Pieces;
+            foreach (Piece piece in pieces)
+            {
+                gPieces.Add(new GraphicsPiece(piece.Id,piece.Color,piece.Row,piece.Col));
+            }
             InitializeComponent();
+            GameWindow_Load();
         }
-        private void GameWindow_Load(object sender, EventArgs e)
+        private void GameWindow_Load()
         {
             client = Program.client;
-            client.BaseAddress = new Uri("https://localhost:5001/");
             this.DoubleBuffered = true;
             bitm = new Bitmap(panel1.Width, panel1.Height);
             InitGraphicsDetails();
@@ -124,7 +129,7 @@ namespace Client
                 }
                 else
                 {
-                    foreach (Piece piece in pieces)
+                    foreach (GraphicsPiece piece in gPieces)
                     {
                         if (piece.Color == Color.Blue.Name && IsInPieceArea(piece,e.Location)) //start dragging
                         {
@@ -141,13 +146,13 @@ namespace Client
         }
         private void UpdatePiecesByStep(Step step)
         {
-            Piece piece = pieces.Find(p => p.Id == step.PieceId);
+            GraphicsPiece piece = gPieces.Find(p => p.Id == step.PieceId);
             piece.Row = step.DstCellRow;
             piece.Col = step.DstCellCol;
             piece.Center = new Point((step.DstCellCol * cellSize) + cellRadius, (step.DstCellRow * cellSize) + cellRadius);
             if (step.Type == StepType.EatLeft.ToString() || step.Type == StepType.EatRight.ToString())
             {
-                pieces.Where(p => p.Id != step.PieceToRemoveId).ToList();
+                gPieces.Where(p => p.Id != step.PieceToRemoveId).ToList();
             }
         }
         private void CreateCells()
@@ -183,7 +188,7 @@ namespace Client
                 g.DrawRectangle(new Pen(Color.Black, 1), cell.Rec);
             }
         }
-        private void DrawOnePiece(Piece piece, Graphics g)
+        private void DrawOnePiece(GraphicsPiece piece, Graphics g)
         {
             Point pieceTopLeft = new Point(piece.Center.X - pieceRadius, piece.Center.Y - pieceRadius);
             Size size = new Size(pieceSize, pieceSize);
@@ -192,23 +197,23 @@ namespace Client
         }
         private void DrawPieces(Graphics g)
         {
-            foreach (Piece piece in pieces)
+            foreach (GraphicsPiece piece in gPieces)
             {
                 DrawOnePiece(piece, g);
             }
         }
         private void CreatePiecesFromList(List<Piece> PiecesFromServer)
         {
-            foreach (Piece piece in PiecesFromServer)
+            foreach (GraphicsPiece piece in PiecesFromServer)
             {
-                Piece newPiece = new Piece(piece.Id, piece.Color, piece.Row, piece.Col);
+                GraphicsPiece newPiece = new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col);
                 newPiece.Center = new Point((piece.Col * cellSize) + cellRadius, (piece.Row * cellSize) + cellRadius);
-                pieces.Add(new Piece(piece.Id, piece.Color, piece.Row, piece.Col));
+                gPieces.Add(new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col));
             }
         }
         private int PieceIdFromCell(Cell cell)
         {
-            foreach (Piece piece in pieces)
+            foreach (Piece piece in gPieces)
             {
                 if (piece.Row == cell.Row && piece.Col == cell.Col)
                 {
@@ -226,7 +231,7 @@ namespace Client
             }
             else
             {
-                return pieces.Find(p => p.Id == pieceId).Color.ToString();
+                return gPieces.Find(p => p.Id == pieceId).Color.ToString();
             }
         }
         private bool IsInCellArea(Cell cell, Point location)
@@ -293,10 +298,15 @@ namespace Client
 
             return null;
         }
-        private bool IsInPieceArea(Piece piece, Point location)
+        private bool IsInPieceArea(GraphicsPiece piece, Point location)
         {
             double dis = Math.Sqrt(Math.Pow(location.X - piece.Center.X, 2) + Math.Pow(location.Y - piece.Center.Y, 2));
             return dis < pieceRadius;
+        }
+
+        private void GameWindow_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -42,6 +42,14 @@ namespace FinalProjectDotNet.Api
             return tblPlayers;
         }
 
+        [Route("login/{Email}/{password}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TblPlayers>>> Login(String email, String password)
+        {
+            return await _context.TblPlayers.Where(p => p.Email == email && p.Password == password).ToListAsync();
+        }
+
+
         // PUT: api/TblPlayers/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.

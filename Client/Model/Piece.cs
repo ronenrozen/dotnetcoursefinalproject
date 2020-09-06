@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace Client.Model
 {
-    class Piece
+    public class Piece
     {
         public string Color { get; set; }
-
-        public Point Center { get; set; }
 
         public int Row { get; set; }
 
