@@ -43,6 +43,12 @@ namespace Client
 
         private void HomePage_Load(object sender, EventArgs e)
         {
+            label3.Text = Login.player.Id.ToString();
+            label4.Text = Login.player.Email;
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
 
         }
     }
