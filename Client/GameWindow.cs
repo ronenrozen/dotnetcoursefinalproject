@@ -33,6 +33,12 @@ namespace Client
         Cell[,] cells = new Cell[gridRows, gridCols];
         List<GraphicsPiece> gPieces = new List<GraphicsPiece>();
 
+        public enum CellState
+        {
+            Black, // black piece in cell
+            Blue, // Blue piece in cell
+            Empty  // no piece in cell
+        }
         enum StepType
         {
             MoveLeft,
@@ -51,11 +57,13 @@ namespace Client
         private Game game;
         public GameWindow(Game g)
         {
+
             game = g;
+           
             List<Piece> pieces = g.Pieces;
             foreach (Piece piece in pieces)
-            {
-                gPieces.Add(new GraphicsPiece(piece.Id,piece.Color,piece.Row,piece.Col));
+            {               
+                gPieces.Add(new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col));  
             }
             InitializeComponent();
             GameWindow_Load();
@@ -67,8 +75,11 @@ namespace Client
             bitm = new Bitmap(panel1.Width, panel1.Height);
             InitGraphicsDetails();
             CreateCells();
-            //send new game request to server
-            //get pieces and gameId
+            //add Center to GraphicsPiece
+            foreach (GraphicsPiece piece in gPieces)
+            {
+                piece.Center = new Point((piece.Col * cellSize) + cellRadius, (piece.Row * cellSize) + cellRadius);
+            }
         }
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -104,14 +115,12 @@ namespace Client
                 }
                 else
                 {
-                    //update piece
-                    UpdatePiecesByStep(step);
+                    PerformClientStep(step);
                     //add step to db
                     clientTurn = false;
                     //update panel
                     RefreshPanel();
                     //post step to server
-
                 }
                 //update panel
                 RefreshPanel();
@@ -142,17 +151,6 @@ namespace Client
                     }
 
                 }
-            }
-        }
-        private void UpdatePiecesByStep(Step step)
-        {
-            GraphicsPiece piece = gPieces.Find(p => p.Id == step.PieceId);
-            piece.Row = step.DstCellRow;
-            piece.Col = step.DstCellCol;
-            piece.Center = new Point((step.DstCellCol * cellSize) + cellRadius, (step.DstCellRow * cellSize) + cellRadius);
-            if (step.Type == StepType.EatLeft.ToString() || step.Type == StepType.EatRight.ToString())
-            {
-                gPieces.Where(p => p.Id != step.PieceToRemoveId).ToList();
             }
         }
         private void CreateCells()
@@ -209,30 +207,19 @@ namespace Client
                 GraphicsPiece newPiece = new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col);
                 newPiece.Center = new Point((piece.Col * cellSize) + cellRadius, (piece.Row * cellSize) + cellRadius);
                 gPieces.Add(new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col));
+                cells[piece.Row, piece.Col].State = piece.Color;
             }
         }
-        private int PieceIdFromCell(Cell cell)
+        private Piece PieceFromCell(Cell cell)
         {
             foreach (Piece piece in gPieces)
             {
                 if (piece.Row == cell.Row && piece.Col == cell.Col)
                 {
-                    return piece.Id;
+                    return piece;
                 }
             }
-            return -1;
-        }
-        private string PieceColorFromCell(Cell cell)
-        {
-            int pieceId = PieceIdFromCell(cell);
-            if (pieceId == -1)
-            {
-                return null;
-            }
-            else
-            {
-                return gPieces.Find(p => p.Id == pieceId).Color.ToString();
-            }
+            return null;
         }
         private bool IsInCellArea(Cell cell, Point location)
         {
@@ -257,11 +244,7 @@ namespace Client
         {
             Cell targetCell = GetCellFromLocation(dropLocation);
 
-            if (targetCell == null)
-                return null;
-
-            int pieceInTargetCellId = PieceIdFromCell(targetCell);
-            if (pieceInTargetCellId != -1)
+            if (targetCell == null || targetCell.State!=CellState.Empty.ToString())
                 return null;
 
             //move forword right
@@ -282,20 +265,20 @@ namespace Client
             if (
                 targetCell.Row == draggSrcCell.Row - 2 &&
                 targetCell.Col == draggSrcCell.Col + 2 &&
-                PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]) == Color.Black.ToString())
+                cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1].State == Color.Black.ToString())
             {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatRight.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]));
+                Piece pieceToDelete = PieceFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]);
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatRight.ToString(), pieceToDelete.Id);
             }
 
             //eat left
             if (targetCell.Row == draggSrcCell.Row - 2 &&
                 targetCell.Col == draggSrcCell.Col - 2 &&
-                 PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]) == Color.Black.ToString())
+                 cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1].State == Color.Black.ToString())
             {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatLeft.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]));
+                Piece pieceToDelete = PieceFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]);
+                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatLeft.ToString(), pieceToDelete.Id);
             }
-
-
             return null;
         }
         private bool IsInPieceArea(GraphicsPiece piece, Point location)
@@ -303,7 +286,85 @@ namespace Client
             double dis = Math.Sqrt(Math.Pow(location.X - piece.Center.X, 2) + Math.Pow(location.Y - piece.Center.Y, 2));
             return dis < pieceRadius;
         }
+        private List<Step> PieceStepOptions(GraphicsPiece piece)
+        {
+            List<Step> stepOptions = new List<Step>();
+            //client
+            int srcCellCol = piece.Col;
+            int srcCellRow = piece.Row;
+            int pieceId = piece.Id;
+            string type;
+            int pieceToRemoveId;
 
+            Cell upRight = cells[piece.Row - 1, piece.Col + 1];
+            Cell upLeft = cells[piece.Row - 1, piece.Col - 1];
+            Cell upRight2 = cells[piece.Row - 2, piece.Col + 2];
+            Cell upLeft2 = cells[piece.Row - 2, piece.Col - 2];
+
+            //check MoveRight
+            type = StepType.MoveRight.ToString();
+            if (upRight.State == CellState.Empty.ToString())
+            {
+                stepOptions.Add(new Step(pieceId, srcCellRow, srcCellCol, upRight.Row, upRight.Col, type));
+            }
+
+            //check MoveLeft
+            type = StepType.EatRight.ToString();
+            if (upLeft.State == CellState.Empty.ToString())
+            {
+                stepOptions.Add(new Step(pieceId, srcCellRow, srcCellCol, upLeft.Row, upLeft.Col, type));
+            }
+
+            //check EatRight
+            pieceToRemoveId = PieceFromCell(upRight).Id;
+            type = StepType.EatRight.ToString();
+            if (upRight2.State == CellState.Empty.ToString()&&
+                upRight.State == CellState.Black.ToString())
+            {
+                stepOptions.Add(new Step(pieceId, srcCellRow, srcCellCol, upRight2.Row, upRight2.Col, type, pieceToRemoveId));
+            }
+
+            //check EatLeft
+            pieceToRemoveId = PieceFromCell(upLeft).Id;
+            type = StepType.EatLeft.ToString();
+            if (upLeft2.State == CellState.Empty.ToString() &&
+                upLeft.State == CellState.Black.ToString())
+            {
+                stepOptions.Add(new Step(pieceId, srcCellRow, srcCellCol, upLeft2.Row, upLeft2.Col, type, pieceToRemoveId));
+            }
+
+            return stepOptions;
+        }  
+        
+        private void PerformClientStep(Step step)
+        {
+            GraphicsPiece p = gPieces.Find(P => P.Id == step.PieceId);
+            p.Row = step.DstCellRow;
+            p.Col = step.DstCellCol;
+            cells[step.SrcCellRow, step.SrcCellCol].State = CellState.Empty.ToString();
+            cells[step.DstCellRow, step.DstCellCol].State = p.Color;
+            p.Center = new Point((step.DstCellCol * cellSize) + cellRadius, (step.DstCellRow * cellSize) + cellRadius);
+            if (step.Type == StepType.EatLeft.ToString() || step.Type == StepType.EatRight.ToString())
+            {
+                gPieces.RemoveAll(piece => piece.Id == step.PieceToRemoveId);
+            }
+        }
+
+        /*
+        private void PerformServerStep(Step step)
+        {
+            Piece p = gPieces.Find(P => P.Id == step.PieceId);
+            p.Row = step.DstCellRow;
+            p.Col = step.DstCellCol;
+            cells[step.SrcCellRow, step.SrcCellCol].State = CellState.Empty.ToString();
+            cells[step.DstCellRow, step.DstCellCol].State = p.Color;
+            
+            if (step.Type == StepType.EatLeft.ToString() || step.Type == StepType.EatRight.ToString())
+            {
+                gPieces.RemoveAll(p => p.Id == step.PieceToRemoveId);
+            }
+        }
+        */
         private void GameWindow_Load_1(object sender, EventArgs e)
         {
 

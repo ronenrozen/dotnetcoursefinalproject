@@ -13,6 +13,7 @@ namespace Client.Model
         public int Col { get; set; }
         public Rectangle Rec { get; set; }
         public Point Center { get; set; }
+        public string State { get; set; }
         public Cell(int row, int col)
         {
             Row = row;
