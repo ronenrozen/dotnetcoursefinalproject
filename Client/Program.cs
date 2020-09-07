@@ -16,7 +16,7 @@ namespace Client
         [STAThread]
         static void Main()
         {
-            client.BaseAddress = new Uri("https://localhost:5001/");
+            client.BaseAddress = new Uri("https://localhost:44317/");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());

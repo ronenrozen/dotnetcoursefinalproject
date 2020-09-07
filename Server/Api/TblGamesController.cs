@@ -88,11 +88,11 @@ namespace Server.Api
         }
         [Route("step/{gameId}")]
         [HttpPost]
-        public async Task<ActionResult<TblGames>> PostStep(int gameId,Step step)
+        public ActionResult<TblGames> PostStep(int gameId, Step step)
         {
             Game cuurentGame = games.Find(g => g.TblGame.Id == gameId);
             updateCurrentGame(cuurentGame, step);
-            Step serverStep = calculateServerStep(cuurentGame);   
+            Step serverStep = calculateServerStep(cuurentGame);
             return CreatedAtAction("serverStep", serverStep);
         }
 

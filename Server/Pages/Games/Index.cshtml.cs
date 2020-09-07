@@ -12,9 +12,9 @@ namespace Server.Pages.Games
 {
     public class IndexModel : PageModel
     {
-        private readonly Server.Data.GameDataContext _context;
+        private readonly GameDataContext _context;
 
-        public IndexModel(Server.Data.GameDataContext context)
+        public IndexModel(GameDataContext context)
         {
             _context = context;
         }
