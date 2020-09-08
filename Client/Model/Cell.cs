@@ -9,14 +9,16 @@ namespace Client.Model
 {
     public class Cell
     {
+
         public int Row { get; set; }
         public int Col { get; set; }
-        public Rectangle Rec { get; set; }
-        public Point Center { get; set; }
-        public Cell(int row, int col)
+        public string State { get; set; }
+        public Cell(int row, int col, string state)
         {
             Row = row;
             Col = col;
+            State = state;
         }
+
     }
 }

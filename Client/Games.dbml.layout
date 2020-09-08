@@ -2,10 +2,16 @@
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.5" name="Games">
   <DataContextMoniker Name="/GamesDataContext" />
   <nestedChildShapes>
-    <classShape Id="b468e5f9-4914-4c24-b0af-ad41dda1ac06" absoluteBounds="8.375, 2, 2, 1.1939925130208333">
+    <classShape Id="b468e5f9-4914-4c24-b0af-ad41dda1ac06" absoluteBounds="3.125, 2.5, 2, 1.1939925130208333">
       <DataClassMoniker Name="/GamesDataContext/TblGame" />
       <nestedChildShapes>
-        <elementListCompartment Id="dc4ef78e-aa13-4576-9955-f11f42ef133a" absoluteBounds="8.39, 2.46, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="dc4ef78e-aa13-4576-9955-f11f42ef133a" absoluteBounds="3.1400000000000006, 2.96, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="dcc45532-79b8-49b9-9375-67f64f7ae9ac" absoluteBounds="3.125, 3.875, 2, 2.1554996744791666">
+      <DataClassMoniker Name="/GamesDataContext/TblStep" />
+      <nestedChildShapes>
+        <elementListCompartment Id="3ecf7aed-48fd-4393-b9d1-8135c9a0d64f" absoluteBounds="3.1400000000000006, 4.335, 1.9700000000000002, 1.5954996744791665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>
