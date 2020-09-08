@@ -59,7 +59,6 @@
             this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "GameWindow";
             this.Text = "GameWindow";
-            this.Load += new System.EventHandler(this.GameWindow_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 

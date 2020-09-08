@@ -33,6 +33,9 @@ namespace Client
     partial void InsertTblGame(TblGame instance);
     partial void UpdateTblGame(TblGame instance);
     partial void DeleteTblGame(TblGame instance);
+    partial void InsertTblStep(TblStep instance);
+    partial void UpdateTblStep(TblStep instance);
+    partial void DeleteTblStep(TblStep instance);
     #endregion
 		
 		public GamesDataContext() : 
@@ -70,6 +73,14 @@ namespace Client
 			get
 			{
 				return this.GetTable<TblGame>();
+			}
+		}
+		
+		public System.Data.Linq.Table<TblStep> TblSteps
+		{
+			get
+			{
+				return this.GetTable<TblStep>();
 			}
 		}
 	}
@@ -135,6 +146,212 @@ namespace Client
 					this._Date = value;
 					this.SendPropertyChanged("Date");
 					this.OnDateChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.TblSteps")]
+	public partial class TblStep : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _Id;
+		
+		private int _SrcCellRow;
+		
+		private int _SrcCellCol;
+		
+		private int _DstCellRow;
+		
+		private int _DstCellCol;
+		
+		private System.Nullable<int> _PieceToRemoveRow;
+		
+		private System.Nullable<int> _PieceToRemoveCol;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnSrcCellRowChanging(int value);
+    partial void OnSrcCellRowChanged();
+    partial void OnSrcCellColChanging(int value);
+    partial void OnSrcCellColChanged();
+    partial void OnDstCellRowChanging(int value);
+    partial void OnDstCellRowChanged();
+    partial void OnDstCellColChanging(int value);
+    partial void OnDstCellColChanged();
+    partial void OnPieceToRemoveRowChanging(System.Nullable<int> value);
+    partial void OnPieceToRemoveRowChanged();
+    partial void OnPieceToRemoveColChanging(System.Nullable<int> value);
+    partial void OnPieceToRemoveColChanged();
+    #endregion
+		
+		public TblStep()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SrcCellRow", DbType="Int NOT NULL")]
+		public int SrcCellRow
+		{
+			get
+			{
+				return this._SrcCellRow;
+			}
+			set
+			{
+				if ((this._SrcCellRow != value))
+				{
+					this.OnSrcCellRowChanging(value);
+					this.SendPropertyChanging();
+					this._SrcCellRow = value;
+					this.SendPropertyChanged("SrcCellRow");
+					this.OnSrcCellRowChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_SrcCellCol", DbType="Int NOT NULL")]
+		public int SrcCellCol
+		{
+			get
+			{
+				return this._SrcCellCol;
+			}
+			set
+			{
+				if ((this._SrcCellCol != value))
+				{
+					this.OnSrcCellColChanging(value);
+					this.SendPropertyChanging();
+					this._SrcCellCol = value;
+					this.SendPropertyChanged("SrcCellCol");
+					this.OnSrcCellColChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DstCellRow", DbType="Int NOT NULL")]
+		public int DstCellRow
+		{
+			get
+			{
+				return this._DstCellRow;
+			}
+			set
+			{
+				if ((this._DstCellRow != value))
+				{
+					this.OnDstCellRowChanging(value);
+					this.SendPropertyChanging();
+					this._DstCellRow = value;
+					this.SendPropertyChanged("DstCellRow");
+					this.OnDstCellRowChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_DstCellCol", DbType="Int NOT NULL")]
+		public int DstCellCol
+		{
+			get
+			{
+				return this._DstCellCol;
+			}
+			set
+			{
+				if ((this._DstCellCol != value))
+				{
+					this.OnDstCellColChanging(value);
+					this.SendPropertyChanging();
+					this._DstCellCol = value;
+					this.SendPropertyChanged("DstCellCol");
+					this.OnDstCellColChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveRow", DbType="Int")]
+		public System.Nullable<int> PieceToRemoveRow
+		{
+			get
+			{
+				return this._PieceToRemoveRow;
+			}
+			set
+			{
+				if ((this._PieceToRemoveRow != value))
+				{
+					this.OnPieceToRemoveRowChanging(value);
+					this.SendPropertyChanging();
+					this._PieceToRemoveRow = value;
+					this.SendPropertyChanged("PieceToRemoveRow");
+					this.OnPieceToRemoveRowChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveCol", DbType="Int")]
+		public System.Nullable<int> PieceToRemoveCol
+		{
+			get
+			{
+				return this._PieceToRemoveCol;
+			}
+			set
+			{
+				if ((this._PieceToRemoveCol != value))
+				{
+					this.OnPieceToRemoveColChanging(value);
+					this.SendPropertyChanging();
+					this._PieceToRemoveCol = value;
+					this.SendPropertyChanged("PieceToRemoveCol");
+					this.OnPieceToRemoveColChanged();
 				}
 			}
 		}

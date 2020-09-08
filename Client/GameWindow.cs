@@ -15,12 +15,12 @@ namespace Client
     public partial class GameWindow : Form
     {
         private HttpClient client;
+        private GamesDataContext db = new GamesDataContext();
+        private BindingSource TblStepsBindingSource = new BindingSource();
 
         //graphics details
         ////////////////////////////////////////
         //grid cells
-        public static int gridRows = 8;
-        public static int gridCols = 4;
         public static int cellSize;
         public static int cellRadius;
         //pieces
@@ -29,46 +29,28 @@ namespace Client
         public static int pieceOffset;
         private Bitmap bitm;
         ////////////////////////////////////////
-        
-        Cell[,] cells = new Cell[gridRows, gridCols];
-        List<GraphicsPiece> gPieces = new List<GraphicsPiece>();
-
-        enum StepType
-        {
-            MoveLeft,
-            MoveRight,
-            EatRight,
-            EatLeft
-        }
 
         //for dragg action
         private bool dragging = false;
-        private GraphicsPiece draggedPiece;
+        private Piece draggedPiece;
         public Cell draggSrcCell;
-        private (int, int) mouseOffsetFromPieceCenter;
-        
-        private bool clientTurn = false;
+        public Point draggedPieceTopLeftLocation;
+
         private Game game;
         public GameWindow(Game g)
         {
-            game = g;
-            List<Piece> pieces = g.Pieces;
-            foreach (Piece piece in pieces)
-            {
-                gPieces.Add(new GraphicsPiece(piece.Id,piece.Color,piece.Row,piece.Col));
-            }
+            game = new Game(g.TblGame);
             InitializeComponent();
             GameWindow_Load();
         }
         private void GameWindow_Load()
         {
+            TblStepsBindingSource.DataSource = db.TblSteps;
+
             client = Program.client;
             this.DoubleBuffered = true;
             bitm = new Bitmap(panel1.Width, panel1.Height);
             InitGraphicsDetails();
-            CreateCells();
-            //send new game request to server
-            //get pieces and gameId
         }
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
@@ -92,37 +74,54 @@ namespace Client
             if (dragging)
             {
                 dragging = false;
-                Point dropLocation = draggedPiece.Center;
+                Point dropLocation = e.Location;
                 Step step = CreateStep(dropLocation);
 
                 if (step == null)
                 {
-                    //dropLocation out of bound or unvalid
-                    draggedPiece.Center = draggSrcCell.Center;
-                    //update panel
-                    RefreshPanel();
+                    textBox1.Text = "Unvalid Move!!!";
                 }
                 else
                 {
-                    //update piece
-                    UpdatePiecesByStep(step);
+                    //update game
+                    game.PerformStep(step);
                     //add step to db
-                    clientTurn = false;
+                    SaveStep(step);
                     //update panel
                     RefreshPanel();
+                    //check end game
+                    string endGame = game.CheckEndGame();
+                    if (endGame != "")
+                    {
+                        EndGame(endGame);
+                    }
+                    
+                    game.Turn = Game.Player.Server.ToString();
+                    textBox1.Text = "Server turn...";
                     //post step to server
                     Step serverStep = getServerStep(step);
-                    //update piece
-                    UpdatePiecesByStep(serverStep);
+                    //update game
+                    game.PerformStep(serverStep);
                     //add step to db
-                    clientTurn = true;
+                    SaveStep(serverStep);
+                    //check end game
+                    endGame = game.CheckEndGame();
+                    if(endGame != "")
+                    {
+                        EndGame(endGame);
+                    }
+                    else
+                    {
+                        game.Turn = Game.Player.Client.ToString();
+                        textBox1.Text = "Your turn...";
+                    }
+                    
                 }
                 //update panel
                 RefreshPanel();
 
             }
         }
-
         private Step getServerStep(Step step)
         {
             Step serverStep = PostStepToServerAsync(step).Result;
@@ -150,62 +149,32 @@ namespace Client
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && clientTurn == true)
+            if (e.Button == MouseButtons.Left && game.Turn == Game.Player.Client.ToString())
             {
                 if (dragging) // middle of dragging action
                 {
-                    draggedPiece.Center = new Point(e.Location.X + mouseOffsetFromPieceCenter.Item1, e.Location.Y + mouseOffsetFromPieceCenter.Item2);
-                    RefreshPanel();
+                    draggedPieceTopLeftLocation = new Point(e.Location.X - pieceRadius, e.Location.Y - pieceRadius);
                 }
                 else
                 {
-                    foreach (GraphicsPiece piece in gPieces)
+                    foreach (Piece piece in game.Pieces)
                     {
-                        if (piece.Color == Color.Blue.Name && IsInPieceArea(piece,e.Location)) //start dragging
+                        if (piece.Player == Game.Player.Client.ToString() && IsInPieceArea(piece,e.Location)) //start dragging
                         {
                             dragging = true;
                             draggedPiece = piece;
-                            draggSrcCell = GetCellFromLocation(draggedPiece.Center);
-                            mouseOffsetFromPieceCenter = (e.Location.X - draggedPiece.Center.X, e.Location.Y - draggedPiece.Center.Y);
+                            draggSrcCell = game.Cells[piece.Row, piece.Col];
+                            draggedPieceTopLeftLocation = new Point(e.Location.X - pieceRadius, e.Location.Y - pieceRadius);
                             break;
                         }
                     }
-
                 }
-            }
-        }
-        private void UpdatePiecesByStep(Step step)
-        {
-            GraphicsPiece piece = gPieces.Find(p => p.Id == step.PieceId);
-            piece.Row = step.DstCellRow;
-            piece.Col = step.DstCellCol;
-            piece.Center = new Point((step.DstCellCol * cellSize) + cellRadius, (step.DstCellRow * cellSize) + cellRadius);
-            if (step.Type == StepType.EatLeft.ToString() || step.Type == StepType.EatRight.ToString())
-            {
-                gPieces.Where(p => p.Id != step.PieceToRemoveId).ToList();
-            }
-        }
-        private void CreateCells()
-        {
-            for (int row = 0; row < gridRows; row++)
-            {
-                int cellY = row * cellSize;
-                for (int col = 0; col < gridCols; col++)
-                {
-                    int cellX = col * cellSize;
-                    Point topLeft = new Point(cellX, cellY);
-                    Size size = new Size(cellSize, cellSize);
-                    Rectangle rec = new Rectangle(topLeft, size);
-                    Point center = new Point(rec.Location.X + cellSize / 2, rec.Location.Y + cellSize / 2);
-                    cells[row, col] = new Cell(row, col);
-                    cells[row, col].Center = center;
-                    cells[row, col].Rec = rec;
-                }
+                RefreshPanel();
             }
         }
         private void InitGraphicsDetails()
         {
-            cellSize = (panel1.Width) / gridCols;
+            cellSize = (panel1.Width) / Game.gridCols;
             cellRadius = cellSize / 2;
             pieceSize = (int)(cellSize * 0.75);
             pieceRadius = (int)(pieceSize / 2);
@@ -213,68 +182,70 @@ namespace Client
         }
         private void DrawGrid(Graphics g)
         {
-            foreach (Cell cell in cells)
+            foreach (Cell cell in game.Cells)
             {
-                g.DrawRectangle(new Pen(Color.Black, 1), cell.Rec);
+                Point topLeft = CellTopLeftPoint(cell);
+                Size size = new Size(cellSize, cellSize);
+                Rectangle rec = new Rectangle(topLeft, size);
+                g.DrawRectangle(new Pen(Color.Black, 1), rec);
             }
-        }
-        private void DrawOnePiece(GraphicsPiece piece, Graphics g)
-        {
-            Point pieceTopLeft = new Point(piece.Center.X - pieceRadius, piece.Center.Y - pieceRadius);
-            Size size = new Size(pieceSize, pieceSize);
-            Rectangle pieceRac = new Rectangle(pieceTopLeft, size);
-            g.FillEllipse(new SolidBrush(Color.FromName(piece.Color)), pieceRac);
         }
         private void DrawPieces(Graphics g)
         {
-            foreach (GraphicsPiece piece in gPieces)
+            foreach (Piece piece in game.Pieces)
             {
-                DrawOnePiece(piece, g);
-            }
-        }
-        private void CreatePiecesFromList(List<Piece> PiecesFromServer)
-        {
-            foreach (GraphicsPiece piece in PiecesFromServer)
-            {
-                GraphicsPiece newPiece = new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col);
-                newPiece.Center = new Point((piece.Col * cellSize) + cellRadius, (piece.Row * cellSize) + cellRadius);
-                gPieces.Add(new GraphicsPiece(piece.Id, piece.Color, piece.Row, piece.Col));
-            }
-        }
-        private int PieceIdFromCell(Cell cell)
-        {
-            foreach (Piece piece in gPieces)
-            {
-                if (piece.Row == cell.Row && piece.Col == cell.Col)
+                Point pieceTopLeft;
+                if (dragging && piece == draggedPiece)
                 {
-                    return piece.Id;
+                    pieceTopLeft = draggedPieceTopLeftLocation;
                 }
+                else
+                {
+                    pieceTopLeft = PieceTopLeftPoint(piece);
+ 
+                }
+                Size size = new Size(pieceSize, pieceSize);
+                Rectangle pieceRac = new Rectangle(pieceTopLeft, size);
+                Color pieceColor;
+                if (piece.Player == Game.Player.Client.ToString())
+                {
+                    pieceColor = Color.FromName(game.ClientColor);
+                }
+                else
+                {
+                    pieceColor = Color.FromName(game.ServerColor);
+                }
+                g.FillEllipse(new SolidBrush(pieceColor), pieceRac);
             }
-            return -1;
         }
-        private string PieceColorFromCell(Cell cell)
+        private Point CellTopLeftPoint(Cell cell)
         {
-            int pieceId = PieceIdFromCell(cell);
-            if (pieceId == -1)
-            {
-                return null;
-            }
-            else
-            {
-                return gPieces.Find(p => p.Id == pieceId).Color.ToString();
-            }
+            return new Point(cell.Col * cellSize, cell.Row * cellSize);
+        }
+        private Point CellCenterPoint(Cell cell)
+        {
+            return new Point(cell.Col * cellSize + cellRadius, cell.Row * cellSize + cellRadius);
+        }
+        private Point PieceTopLeftPoint(Piece piece)
+        {
+            return new Point(piece.Col * cellSize + pieceOffset, piece.Row * cellSize+ pieceOffset);
+        }
+        private Point PieceCenterPoint(Piece piece)
+        {
+            return new Point(piece.Col * cellSize + cellRadius, piece.Row * cellSize + cellRadius);
         }
         private bool IsInCellArea(Cell cell, Point location)
         {
+            Point topLeft = CellTopLeftPoint(cell);
             return
-                location.X < cell.Center.X + cellRadius
-                && location.X > cell.Center.X - cellRadius
-                && location.Y < cell.Center.Y + cellRadius
-                && location.Y > cell.Center.Y - cellRadius;
+                location.X < topLeft.X + cellSize
+                && location.X > topLeft.X
+                && location.Y < topLeft.Y + cellRadius
+                && location.Y > topLeft.Y;
         }
         private Cell GetCellFromLocation(Point location)
         {
-            foreach (Cell cell in cells)
+            foreach (Cell cell in game.Cells)
             {
                 if (IsInCellArea(cell,location))
                 {
@@ -290,53 +261,41 @@ namespace Client
             if (targetCell == null)
                 return null;
 
-            int pieceInTargetCellId = PieceIdFromCell(targetCell);
-            if (pieceInTargetCellId != -1)
-                return null;
-
-            //move forword right
-            if (targetCell.Row == draggSrcCell.Row - 1 &&
-                targetCell.Col == draggSrcCell.Col + 1)
+            List<Step> steps = game.AllStepOptionsForPlayer(Game.Player.Client.ToString());
+            foreach(Step step in steps)
             {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveRight.ToString());
+                if(step.DstCellRow == targetCell.Row && step.DstCellCol == targetCell.Col)
+                {
+                    return step;
+                }
             }
-
-            //move forword left
-            if (targetCell.Row == draggSrcCell.Row - 1 &&
-               targetCell.Col == draggSrcCell.Col - 1)
-            {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.MoveLeft.ToString());
-            }
-
-            //eat right
-            if (
-                targetCell.Row == draggSrcCell.Row - 2 &&
-                targetCell.Col == draggSrcCell.Col + 2 &&
-                PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]) == Color.Black.ToString())
-            {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatRight.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col + 1]));
-            }
-
-            //eat left
-            if (targetCell.Row == draggSrcCell.Row - 2 &&
-                targetCell.Col == draggSrcCell.Col - 2 &&
-                 PieceColorFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]) == Color.Black.ToString())
-            {
-                return new Step(draggedPiece.Id, draggSrcCell.Row, draggSrcCell.Col, targetCell.Row, targetCell.Col, StepType.EatLeft.ToString(), PieceIdFromCell(cells[draggSrcCell.Row - 1, draggSrcCell.Col - 1]));
-            }
-
 
             return null;
         }
-        private bool IsInPieceArea(GraphicsPiece piece, Point location)
+        private bool IsInPieceArea(Piece piece, Point location)
         {
-            double dis = Math.Sqrt(Math.Pow(location.X - piece.Center.X, 2) + Math.Pow(location.Y - piece.Center.Y, 2));
+            Point pieceCenterPoint = PieceCenterPoint(piece);
+            double dis = Math.Sqrt(Math.Pow(location.X - pieceCenterPoint.X, 2) + Math.Pow(location.Y - pieceCenterPoint.Y, 2));
             return dis < pieceRadius;
         }
-
-        private void GameWindow_Load_1(object sender, EventArgs e)
+        private void SaveStep(Step step)
         {
-
+            TblStepsBindingSource.Add(step);
+        }
+        private void EndGame(string endGameStr)
+        {
+            if (endGameStr == Game.EndGame.ClientWinner.ToString())
+            {
+                textBox1.Text = "You Win!!!";
+            }
+            else if (endGameStr == Game.EndGame.ServerWinner.ToString())
+            {
+                textBox1.Text = "You Lost :(";
+            }
+            else if (endGameStr == Game.EndGame.Draw.ToString())
+            {
+                textBox1.Text = "Its a Draw";
+            }
         }
     }
 }

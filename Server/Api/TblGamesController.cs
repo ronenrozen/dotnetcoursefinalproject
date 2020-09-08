@@ -15,7 +15,7 @@ namespace Server.Api
     public class TblGamesController : ControllerBase
     {
         private readonly GameDataContext _context;
-        private List<Game> games { get; set; }
+        private List<Game> games = new List<Game>();
         public TblGamesController(GameDataContext context)
         {
             _context = context;
@@ -77,7 +77,7 @@ namespace Server.Api
         // POST: api/TblGames
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
+        [HttpPost] //get new game request and create game
         public async Task<ActionResult<TblGames>> PostTblGames(TblGames tblGames)
         {
             _context.TblGames.Add(tblGames);
@@ -87,25 +87,15 @@ namespace Server.Api
             return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, g);
         }
         [Route("step/{gameId}")]
-        [HttpPost]
+        [HttpPost] //get step from client and return server step
         public ActionResult<TblGames> PostStep(int gameId, Step step)
         {
-            Game cuurentGame = games.Find(g => g.TblGame.Id == gameId);
-            updateCurrentGame(cuurentGame, step);
-            Step serverStep = calculateServerStep(cuurentGame);
+            Game currentGame = games.Find(g => g.TblGame.Id == gameId);
+            currentGame.PerformStep(step);
+            Step serverStep = currentGame.GetRandomStep(Game.Player.Server.ToString());
+            currentGame.PerformStep(serverStep);
             return CreatedAtAction("serverStep", serverStep);
         }
-
-        private Step calculateServerStep(Game cuurentGame)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void updateCurrentGame(Game cuurentGame,Step step)
-        {
-            throw new NotImplementedException();
-        }
-
         // DELETE: api/TblGames/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<TblGames>> DeleteTblGames(int id)
