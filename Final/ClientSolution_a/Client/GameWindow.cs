@@ -39,6 +39,16 @@ namespace Client
         public Point draggedPieceTopLeftLocation;
 
         private Game game;
+        static string clientTurnStr = "Your Turn...";
+        static string serverTurnStr = "Server Turn...";
+        static string unvalidStepStr = "Unvalid Step! Try Again";
+        static string drawStr = "Its a Draw, Game Ended";
+        static string clientWinStr = "You Win!! Game Ended";
+        static string clientLostStr = "You Lost ): Game Ended";
+        static string emptyStr = "";
+        static string topLabelStr = clientTurnStr;
+        static string bottomLabelStr = "";
+
         public GameWindow(Game g)
         {
             game = new Game(g.TblGame);
@@ -61,6 +71,8 @@ namespace Client
             {
                 DrawGrid(g);
                 DrawPieces(g);
+                label1.Text = topLabelStr;
+                label2.Text = bottomLabelStr;
                 e.Graphics.DrawImage(bitm, 0, 0);
             }
         }
@@ -82,14 +94,15 @@ namespace Client
 
                 if (step == null)
                 {
-                    textBox1.Text = "Unvalid Move!!!";
+                    bottomLabelStr = unvalidStepStr;
                 }
                 else
                 {
+                    bottomLabelStr = emptyStr;
                     //update game
                     game.PerformStep(step);
                     //add step to db
-                    SaveStep(step);
+                    //SaveStep(step);
                     //update panel
                     RefreshPanel();
                     //check end game
@@ -100,13 +113,13 @@ namespace Client
                     }
                     
                     game.Turn = Game.Player.Server.ToString();
-                    textBox1.Text = "Server turn...";
+                    topLabelStr = serverTurnStr;
                     //post step to server
                     Step serverStep = getServerStep(step);
                     //update game
                     game.PerformStep(serverStep);
                     //add step to db
-                    SaveStep(serverStep);
+                    //SaveStep(serverStep);
                     //check end game
                     endGame = game.CheckEndGame();
                     if(endGame != "")
@@ -116,7 +129,7 @@ namespace Client
                     else
                     {
                         game.Turn = Game.Player.Client.ToString();
-                        textBox1.Text = "Your turn...";
+                        topLabelStr = clientTurnStr;
                     }
                     
                 }
@@ -243,7 +256,7 @@ namespace Client
             return
                 location.X < topLeft.X + cellSize
                 && location.X > topLeft.X
-                && location.Y < topLeft.Y + cellRadius
+                && location.Y < topLeft.Y + cellSize
                 && location.Y > topLeft.Y;
         }
         private Cell GetCellFromLocation(Point location)
@@ -267,7 +280,8 @@ namespace Client
             List<Step> steps = game.AllStepOptionsForPlayer(Game.Player.Client.ToString());
             foreach(Step step in steps)
             {
-                if(step.DstCellRow == targetCell.Row && step.DstCellCol == targetCell.Col)
+                if(step.DstCellRow == targetCell.Row && step.DstCellCol == targetCell.Col &&
+                    step.SrcCellRow == draggSrcCell.Row && step.SrcCellCol == draggSrcCell.Col)
                 {
                     return step;
                 }
@@ -313,16 +327,28 @@ namespace Client
         {
             if (endGameStr == Game.EndGame.ClientWinner.ToString())
             {
-                textBox1.Text = "You Win!!!";
+                topLabelStr = clientWinStr;
             }
             else if (endGameStr == Game.EndGame.ServerWinner.ToString())
             {
-                textBox1.Text = "You Lost :(";
+                topLabelStr = clientLostStr;
             }
             else if (endGameStr == Game.EndGame.Draw.ToString())
             {
-                textBox1.Text = "Its a Draw";
+                topLabelStr = drawStr;
             }
+
+            RefreshPanel();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
