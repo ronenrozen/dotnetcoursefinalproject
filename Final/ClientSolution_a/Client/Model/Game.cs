@@ -150,12 +150,12 @@ namespace Client.Model
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft.Item1, downLeft.Item2));
                 }
                 //EatRight
-                if (EmptyCell(downRight2) && PlayerInCell(Player.Server.ToString(), downRight))
+                if (EmptyCell(downRight2) && PlayerInCell(Player.Client.ToString(), downRight))
                 {
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight2.Item1, downRight2.Item2, downRight.Item1, downRight.Item2));
                 }
                 //EatLeft
-                if (EmptyCell(downLeft2) && PlayerInCell(Player.Server.ToString(), downLeft))
+                if (EmptyCell(downLeft2) && PlayerInCell(Player.Client.ToString(), downLeft))
                 {
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft2.Item1, downLeft2.Item2, downLeft.Item1, downLeft.Item2));
                 }

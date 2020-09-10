@@ -12,7 +12,7 @@ namespace Server.Model
         static Random rnd = new Random();
         public static int gridRows = 8;
         public static int gridCols = 4;
-        public List<(int, int)> blackPiecesRowCol = new List<(int, int)> { (0, 1), (1, 0), (0, 2), (1, 3) };
+        public List<(int, int)> blackPiecesRowCol = new List<(int, int)> { (0, 0), (1, 1), (0, 2), (1, 3) };
         public List<(int, int)> bluePiecesRowCol = new List<(int, int)> { (7, 0), (6, 1), (7, 2), (6, 3) };
 
         public enum EndGame
@@ -54,8 +54,8 @@ namespace Server.Model
             TblGame = tblGame;
             Pieces = CreatePieces();
             Cells = CreateCells();
-            ServerColor = Color.Black.ToString();
-            ClientColor = Color.Blue.ToString();
+            ServerColor = Color.Black.Name;
+            ClientColor = Color.Blue.Name;
         }
         public List<Piece> CreatePieces()
         {
@@ -73,7 +73,7 @@ namespace Server.Model
                 //blue pieces
                 row = bluePiecesRowCol[i].Item1;
                 col = bluePiecesRowCol[i].Item2;
-                Piece bluePiece = new Piece(row, col, Player.Server.ToString());
+                Piece bluePiece = new Piece(row, col, Player.Client.ToString());
                 pieces.Add(bluePiece);
             }
 
@@ -150,12 +150,12 @@ namespace Server.Model
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft.Item1, downLeft.Item2));
                 }
                 //EatRight
-                if (EmptyCell(downRight2) && PlayerInCell(Player.Server.ToString(), downRight))
+                if (EmptyCell(downRight2) && PlayerInCell(Player.Client.ToString(), downRight))
                 {
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight2.Item1, downRight2.Item2, downRight.Item1, downRight.Item2));
                 }
                 //EatLeft
-                if (EmptyCell(downLeft2) && PlayerInCell(Player.Server.ToString(), downLeft))
+                if (EmptyCell(downLeft2) && PlayerInCell(Player.Client.ToString(), downLeft))
                 {
                     stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft2.Item1, downLeft2.Item2, downLeft.Item1, downLeft.Item2));
                 }
@@ -210,7 +210,7 @@ namespace Server.Model
             Cells[step.DstCellRow, step.DstCellCol].State = piece.Player.ToString();
             piece.Row = step.DstCellRow;
             piece.Col = step.DstCellCol;
-            if(step.PieceToRemoveCol != -1 && step.PieceToRemoveRow != -1)
+            if (step.PieceToRemoveCol != -1 && step.PieceToRemoveRow != -1)
             {
                 Cells[step.PieceToRemoveRow, step.PieceToRemoveCol].State = piece.Player.ToString();
                 Pieces.RemoveAll(p => p.Row == step.PieceToRemoveRow && p.Col == step.PieceToRemoveCol);
@@ -224,7 +224,7 @@ namespace Server.Model
         }
         public string CheckEndGame()
         {
-            foreach(Piece piece in Pieces)
+            foreach (Piece piece in Pieces)
             {
                 if (piece.Player == Player.Client.ToString() && piece.Row == 0)
                 {
@@ -236,14 +236,14 @@ namespace Server.Model
                 }
             }
 
-            if(AllStepOptionsForPlayer(Player.Server.ToString()).Count == 0 &&
+            if (AllStepOptionsForPlayer(Player.Server.ToString()).Count == 0 &&
                 AllStepOptionsForPlayer(Player.Client.ToString()).Count == 0)
             {
                 return EndGame.Draw.ToString();
             }
 
             return "";
-            
+
         }
     }
 }

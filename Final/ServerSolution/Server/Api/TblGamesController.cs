@@ -100,7 +100,7 @@ namespace Server.Api
             currentGame.PerformStep(serverStep);
             String responseStep = JsonConvert.SerializeObject(serverStep, Formatting.Indented);
             return CreatedAtAction("serverStep", serverStep);
-        }
+            }
         // DELETE: api/TblGames/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<TblGames>> DeleteTblGames(int id)
