@@ -1,4 +1,5 @@
 ﻿using Client.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -154,10 +155,13 @@ namespace Client
         }
         private async Task<Step> PostStepToServerAsync(Step step)
         {
-            HttpResponseMessage response = await client.PostAsJsonAsync("api/TblGames/step/"+ game.TblGame.Id, step);
+            string path = "api/TblGames/step/" + game.TblGame.Id;
+            string stepJson = JsonConvert.SerializeObject(step, Formatting.Indented);
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, stepJson);
             if (response.IsSuccessStatusCode)
             {
-                Step serverStep = await response.Content.ReadAsAsync<Step>();
+                string stepStr = await response.Content.ReadAsStringAsync();
+                Step serverStep = JsonConvert.DeserializeObject<Step>(stepStr);
                 return serverStep;
             }
             return null;

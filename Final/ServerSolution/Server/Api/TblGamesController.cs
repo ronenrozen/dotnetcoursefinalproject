@@ -16,7 +16,7 @@ namespace Server.Api
     public class TblGamesController : ControllerBase
     {
         private readonly GameDataContext _context;
-        private List<Game> games = new List<Game>();
+        private static List<Game> games = new List<Game>();
         public TblGamesController(GameDataContext context)
         {
             _context = context;
@@ -91,12 +91,14 @@ namespace Server.Api
 
         [Route("step/{gameId}")]
         [HttpPost] //get step from client and return server step
-        public ActionResult<TblGames> PostStep(int gameId, Step step)
+        public ActionResult<String> PostStep(int gameId, [FromBody] string jsonStep)
         {
             Game currentGame = games.Find(g => g.TblGame.Id == gameId);
+            Step step = JsonConvert.DeserializeObject<Step>(jsonStep);
             currentGame.PerformStep(step);
             Step serverStep = currentGame.GetRandomStep(Game.Player.Server.ToString());
             currentGame.PerformStep(serverStep);
+            String responseStep = JsonConvert.SerializeObject(serverStep, Formatting.Indented);
             return CreatedAtAction("serverStep", serverStep);
         }
         // DELETE: api/TblGames/5
