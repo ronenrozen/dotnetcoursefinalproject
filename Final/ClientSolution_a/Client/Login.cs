@@ -44,7 +44,7 @@ namespace Client
         //LOGIN BUTTON
         private async void button1_Click(object sender, EventArgs e)
         {
-            /*
+            
             string email = textBox1.Text;
             string password = textBox2.Text;
             string path = "api/TblPlayers/login/" + email + "/" + password;
@@ -60,10 +60,10 @@ namespace Client
                 }
 
             }
-            */
+            
             //if login details ok by the server
-            HomePage manueForm = new HomePage();
-            manueForm.ShowDialog();
+            //HomePage manueForm = new HomePage();
+            //manueForm.ShowDialog();
         }
 
         private void Login_Load_1(object sender, EventArgs e)

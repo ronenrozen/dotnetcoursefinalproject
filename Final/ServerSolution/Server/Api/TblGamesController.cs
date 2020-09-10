@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Server.Data;
 using Server.Model;
 
@@ -78,14 +79,16 @@ namespace Server.Api
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost] //get new game request and create game
-        public async Task<ActionResult<TblGames>> PostTblGames(TblGames tblGames)
+        public async Task<ActionResult<String>> PostTblGames(TblGames tblGames)
         {
             _context.TblGames.Add(tblGames);
             await _context.SaveChangesAsync();
             Game g = new Game(tblGames);
             games.Add(g);
-            return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, g);
+            String gameStr = JsonConvert.SerializeObject(g, Formatting.Indented);
+            return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, gameStr);
         }
+
         [Route("step/{gameId}")]
         [HttpPost] //get step from client and return server step
         public ActionResult<TblGames> PostStep(int gameId, Step step)

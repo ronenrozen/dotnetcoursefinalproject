@@ -1,4 +1,5 @@
 ﻿using Client.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,20 +25,21 @@ namespace Client
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            /*
+            
             TblGames tblGame = new TblGames { Date = DateTime.Now, Pid = Login.player.Id };
             HttpResponseMessage response = await client.PostAsJsonAsync("api/TblGames", tblGame);
             if (response.IsSuccessStatusCode)
             {
-                Game g = await response.Content.ReadAsAsync<Game>();
+                string gameStr = await response.Content.ReadAsStringAsync();
+                Game g = JsonConvert.DeserializeObject<Game>(gameStr);
                 GameWindow gameWindow = new GameWindow(g);
                 gameWindow.ShowDialog();
             }
-            */
-            TblGames tblGame = new TblGames { Date = DateTime.Now, Pid = 12 };
-            Game g = new Game(tblGame);
-            GameWindow gameWindow = new GameWindow(g);
-            gameWindow.ShowDialog();
+
+            //TblGames tblGame = new TblGames { Date = DateTime.Now, Pid = 12 };
+            //Game g = new Game(tblGame);
+            //GameWindow gameWindow = new GameWindow(g);
+            //gameWindow.ShowDialog();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -48,8 +50,8 @@ namespace Client
 
         private void HomePage_Load(object sender, EventArgs e)
         {
-            //label3.Text = Login.player.Id.ToString();
-            //label4.Text = Login.player.Email;
+            label3.Text = Login.player.Id.ToString();
+            label4.Text = Login.player.Email;
         }
 
         private void label4_Click(object sender, EventArgs e)

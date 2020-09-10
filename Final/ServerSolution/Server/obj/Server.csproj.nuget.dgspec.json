@@ -1,20 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Git\\GitDotnet\\Final\\ServerSolution\\Server\\Server.csproj": {}
+    "C:\\Users\\rrozen\\source\\repos\\FinalProjectDotNet\\dotnetcoursefinalproject\\Final\\ServerSolution\\Server\\Server.csproj": {}
   },
   "projects": {
-    "C:\\Git\\GitDotnet\\Final\\ServerSolution\\Server\\Server.csproj": {
+    "C:\\Users\\rrozen\\source\\repos\\FinalProjectDotNet\\dotnetcoursefinalproject\\Final\\ServerSolution\\Server\\Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Git\\GitDotnet\\Final\\ServerSolution\\Server\\Server.csproj",
+        "projectUniqueName": "C:\\Users\\rrozen\\source\\repos\\FinalProjectDotNet\\dotnetcoursefinalproject\\Final\\ServerSolution\\Server\\Server.csproj",
         "projectName": "Server",
-        "projectPath": "C:\\Git\\GitDotnet\\Final\\ServerSolution\\Server\\Server.csproj",
-        "packagesPath": "C:\\Users\\Regev\\.nuget\\packages\\",
-        "outputPath": "C:\\Git\\GitDotnet\\Final\\ServerSolution\\Server\\obj\\",
+        "projectPath": "C:\\Users\\rrozen\\source\\repos\\FinalProjectDotNet\\dotnetcoursefinalproject\\Final\\ServerSolution\\Server\\Server.csproj",
+        "packagesPath": "C:\\Users\\rrozen\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\rrozen\\source\\repos\\FinalProjectDotNet\\dotnetcoursefinalproject\\Final\\ServerSolution\\Server\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Regev\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\rrozen\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -59,6 +62,10 @@
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[3.1.4, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
             }
           },
           "imports": [
@@ -71,12 +78,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[3.1.2, 3.1.2]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -85,7 +86,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.300\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.401\\RuntimeIdentifierGraph.json"
         }
       }
     }
