@@ -12,6 +12,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.TblGames[0].Id)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.TblGames[0].Date)
             </th>
             <th>
@@ -23,17 +26,20 @@
     <tbody>
         @foreach (var item in Model.TblGames)
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Pid)
-                </td>
-                <td>
-                    <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pid)
+            </td>
+            <td>
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
         }
     </tbody>
 </table>

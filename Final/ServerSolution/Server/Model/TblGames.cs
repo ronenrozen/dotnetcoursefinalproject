@@ -8,6 +8,7 @@ namespace Server.Model
 {
     public class TblGames
     {
+        [DisplayName("Game ID")]
         public int Id { get; set; }
         public DateTime Date { get; set; }
         [DisplayName("Player ID")]
