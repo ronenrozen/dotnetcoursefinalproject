@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "type": "mssql.local",
+      "connectionId": "PlayersDataContext"
+    },
+    "mssql2": {
+      "type": "mssql.local",
+      "connectionId": "PlayerDataContext"
+    },
+    "mssql3": {
+      "type": "mssql.local",
+      "connectionId": "GameDataContext"
+    }
+  }
+}

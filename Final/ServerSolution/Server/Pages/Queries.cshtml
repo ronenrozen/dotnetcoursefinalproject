@@ -1,0 +1,75 @@
+﻿@page
+@model Server.Pages.QueriesModel
+@{
+    ViewData["Title"] = "Queries";
+}
+
+<h1>Queries</h1>
+
+
+<h4 class="mb-3 mt-3">Games Count per Player</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Player ID
+            </th>
+            <th>
+                Player Email
+            </th>
+            <th>
+                Games count
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.playerToGames)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Pid)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GameCount)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="mb-3 mt-3">Games for Player</h4>
+
+<p>Select player from the combox to see his games</p>
+
+@Html.DropDownListFor(m=>m.playersList,
+            new SelectList(Model.TblPlayers.Select(x=>x.Email).ToList()),
+            "Select Player")
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Game ID
+            </th>
+            <th>
+                Game Date
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.currentPlayerGames)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

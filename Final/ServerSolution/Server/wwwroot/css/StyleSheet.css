@@ -1,0 +1,36 @@
+﻿section, form {
+    padding: 20px 20px;
+    border: solid 1px #000000;
+    border-radius: 5px;
+}
+
+    section img {
+        border: solid 1px #000000;
+    }
+
+    section ul {
+        padding-left: 0;
+    }
+
+
+a {
+    
+    font-weight:700;
+}
+
+
+i {
+    margin: auto 2px;
+}
+
+
+ul {
+    list-style-type: none;
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+table{
+    margin: 2em auto;
+}
