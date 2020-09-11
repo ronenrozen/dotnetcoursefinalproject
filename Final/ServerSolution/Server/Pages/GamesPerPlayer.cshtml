@@ -10,38 +10,14 @@
 
 <p>Select player from the combox to see his games</p>
 
-<form method="post">
+<form action="~/Query1" method="post">
     <div class="form-group">
         @Html.DropDownListFor(m => m.playerEmail,
                     new SelectList(Model.TblPlayers.Select(x => x.Email).ToList()),
                     "Select Player")
     </div>
     <div class="form-group">
-        <input type="submit" value="Create" class="btn btn-primary" />
+        <input type="submit" value="Show Data" class="btn btn-primary" />
     </div>
 </form>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Game ID
-            </th>
-            <th>
-                Game Date
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.currentPlayerGames)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+
