@@ -1,5 +1,5 @@
 ﻿@page
-@model Server.Pages.QueriesModel
+@model Server.Pages.CountGamesPerPlayer
 @{
     ViewData["Title"] = "Queries";
 }
@@ -34,40 +34,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.GameCount)
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<h4 class="mb-3 mt-3">Games for Player</h4>
-
-<p>Select player from the combox to see his games</p>
-
-@Html.DropDownListFor(m=>m.playersList,
-            new SelectList(Model.TblPlayers.Select(x=>x.Email).ToList()),
-            "Select Player")
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Game ID
-            </th>
-            <th>
-                Game Date
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.currentPlayerGames)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Date)
                 </td>
             </tr>
         }

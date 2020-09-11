@@ -79,28 +79,29 @@ namespace Server.Api
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost] //get new game request and create game
-        public async Task<ActionResult<String>> PostTblGames(TblGames tblGames)
+        public async Task<ActionResult<string>> PostTblGames(TblGames tblGames)
         {
             _context.TblGames.Add(tblGames);
             await _context.SaveChangesAsync();
             Game g = new Game(tblGames);
             games.Add(g);
-            String gameStr = JsonConvert.SerializeObject(g, Formatting.Indented);
+            string gameStr = JsonConvert.SerializeObject(g, Formatting.Indented);
             return CreatedAtAction("GetTblGames", new { id = tblGames.Id }, gameStr);
         }
 
-        [Route("step/{gameId}")]
-        [HttpPost] //get step from client and return server step
-        public ActionResult<String> PostStep(int gameId, [FromBody] string jsonStep)
+        [Route("step/{gameId}/{SrcCellCol}/{SrcCellRow}/{PieceToRemoveCol}/{PieceToRemoveRow}/{DstCellCol}/{DstCellRow}")]
+        [HttpGet] //get new game request and create game
+        public ActionResult<Step> PostStepToServer(int gameId, int SrcCellCol, int SrcCellRow, int DstCellCol, int DstCellRow, int PieceToRemoveRow, int PieceToRemoveCol)
         {
             Game currentGame = games.Find(g => g.TblGame.Id == gameId);
-            Step step = JsonConvert.DeserializeObject<Step>(jsonStep);
+            Step step = new Step(SrcCellRow, SrcCellCol, DstCellRow, DstCellCol, PieceToRemoveRow, PieceToRemoveCol);
             currentGame.PerformStep(step);
             Step serverStep = currentGame.GetRandomStep(Game.Player.Server.ToString());
             currentGame.PerformStep(serverStep);
-            String responseStep = JsonConvert.SerializeObject(serverStep, Formatting.Indented);
-            return CreatedAtAction("serverStep", serverStep);
-            }
+            return serverStep;
+        }
+
+
         // DELETE: api/TblGames/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<TblGames>> DeleteTblGames(int id)

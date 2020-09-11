@@ -33,3 +33,8 @@ msbuild.wrn
 
 bin/
 obj/
+*.config
+*.v2
+Final/ServerSolution/Server/bin/Debug/netcoreapp3.1/Server.deps.json
+*.dll
+*.exe

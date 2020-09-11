@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FinalProjectDotNet.Data;
 using FinalProjectDotNet.Model;
-using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +12,12 @@ using Server.Model;
 
 namespace Server.Pages
 {
-    public class QueriesModel : PageModel
+    public class GamesPerPlayerModel : PageModel
     {
         private readonly GameDataContext _context;
         private readonly PlayerDataContext _Pcontext;
 
-        public QueriesModel(GameDataContext context, PlayerDataContext Pcontext)
+        public GamesPerPlayerModel(GameDataContext context, PlayerDataContext Pcontext)
         {
             _context = context;
             _Pcontext = Pcontext;
@@ -28,7 +27,7 @@ namespace Server.Pages
         public IList<TblPlayers> TblPlayers { get; set; }
 
         public List<PlayerToGame> playerToGames { get; set; }
-        public Dictionary<TblPlayers, List<TblGames>> map { get; set; }
+        public static Dictionary<TblPlayers, List<TblGames>> map { get; set; }
         public List<TblGames> currentPlayerGames { get; set; }
         public List<String> playersList { get; set; }
         public async Task OnGetAsync()
@@ -54,12 +53,6 @@ namespace Server.Pages
                 }
                 playerToGames.Add(new PlayerToGame { Pid = playerId, Email = player.Email, GameCount = gameCount });
             }
-
-        }
-
-        public void OnPostAstnc()
-        {
-
         }
 
         private void addToMap(TblPlayers player, TblGames game)
@@ -72,6 +65,30 @@ namespace Server.Pages
             else
             {
                 map.Add(player, new List<TblGames> { game });
+            }
+
+        }
+
+        [BindProperty]
+        public string playerEmail { get; set; }
+
+        public async void OnPostAsync()
+        {
+            TblPlayers = await _Pcontext.TblPlayers.ToListAsync();
+            TblPlayers cPlayer = null;
+
+            foreach (TblPlayers player in TblPlayers)
+            {
+                if (player.Email.Equals(playerEmail))
+                {
+                    cPlayer = player;
+                }
+            }
+            if (cPlayer != null)
+            {
+                List<TblGames> playerGames;
+                map.TryGetValue(cPlayer, out playerGames);
+                currentPlayerGames = playerGames;
             }
 
         }

@@ -1,0 +1,47 @@
+﻿@page
+@model Server.Pages.GamesPerPlayerModel
+@{
+    ViewData["Title"] = "GamesPerPlayer";
+}
+
+<h1>Games Per Player</h1>
+
+<h4 class="mb-3 mt-3">Games for Player</h4>
+
+<p>Select player from the combox to see his games</p>
+
+<form method="post">
+    <div class="form-group">
+        @Html.DropDownListFor(m => m.playerEmail,
+                    new SelectList(Model.TblPlayers.Select(x => x.Email).ToList()),
+                    "Select Player")
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Game ID
+            </th>
+            <th>
+                Game Date
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.currentPlayerGames)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

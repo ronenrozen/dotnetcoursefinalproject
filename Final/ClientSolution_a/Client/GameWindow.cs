@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -141,10 +142,10 @@ namespace Client
         }
         private Step getServerStep(Step step)
         {
-            Step serverStep = PostStepToServerAsync(step).Result;
+            Step serverStep = PostStepToServerAsync(step);
             if (serverStep == null)
             {
-                serverStep = PostStepToServerAsync(step).Result;
+                serverStep = PostStepToServerAsync(step);
                 if (serverStep == null)
                 {
                     throw new Exception("Couldnt retreive step from server");
@@ -153,18 +154,25 @@ namespace Client
             return serverStep;
             
         }
-        private async Task<Step> PostStepToServerAsync(Step step)
+  
+        private  Step PostStepToServerAsync(Step step)
         {
-            string path = "api/TblGames/step/" + game.TblGame.Id;
-            string stepJson = JsonConvert.SerializeObject(step, Formatting.Indented);
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, stepJson);
+
+            string path = PreparePathForSTep(step);
+
+            HttpResponseMessage response = client.GetAsync(path).Result;
+
             if (response.IsSuccessStatusCode)
             {
-                string stepStr = await response.Content.ReadAsStringAsync();
-                Step serverStep = JsonConvert.DeserializeObject<Step>(stepStr);
+                Step serverStep = response.Content.ReadAsAsync<Step>().Result;
                 return serverStep;
             }
             return null;
+        }
+
+        private string PreparePathForSTep(Step step)
+        {
+            return "api/TblGames/step/" + game.TblGame.Id + "/" + step.SrcCellCol + "/" + step.SrcCellRow + "/" + step.PieceToRemoveCol + "/" + step.PieceToRemoveRow + "/" + step.DstCellCol + "/" + step.DstCellRow;
         }
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
