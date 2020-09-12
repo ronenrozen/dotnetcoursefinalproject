@@ -44,7 +44,7 @@ namespace Client
 
         private void button2_Click(object sender, EventArgs e)
         {
-            RestoreGameMenu restoreMenu = new RestoreGameMenu();
+            RestoreGameMenu restoreMenu = new RestoreGameMenu(Login.player.Id);
             restoreMenu.ShowDialog();
         }
 

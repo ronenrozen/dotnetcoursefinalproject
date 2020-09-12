@@ -72,41 +72,46 @@ namespace Client
             label1.Text = "";
         }
 
+        private void UpdateLabel(Step step)
+        {
+            if (step.EndGameResult != "")
+            {
+                //end game
+                if (step.EndGameResult == Game.EndGame.ClientWinner.ToString())
+                {
+                    label1.Text = clientWinStr;
+                }
+                else if (step.EndGameResult == Game.EndGame.ServerWinner.ToString())
+                {
+                    label1.Text = clientLostStr;
+                }
+                else
+                {
+                    label1.Text = drawStr;
+                }
+            }
+            else
+            {
+                if (game.GetPieceByRowCol((step.SrcCellRow, step.SrcCellCol)).Player == Game.Player.Client.ToString())
+                {
+                    label1.Text = clientTurnStr;
+                }
+                else
+                {
+                    label1.Text = serverTurnStr;
+                }
+
+            }
+
+            Invalidate();
+            Update();
+        }
+
         private async void StartPerformSteps()
         {
             foreach(Step step in steps)
             {
-                if(step.EndGameResult != "")
-                {
-                    //end game
-                    if(step.EndGameResult == Game.EndGame.ClientWinner.ToString())
-                    {
-                        label1.Text = clientWinStr;
-                    }
-                    else if(step.EndGameResult == Game.EndGame.ServerWinner.ToString())
-                    {
-                        label1.Text = clientLostStr;
-                    }
-                    else
-                    {
-                        label1.Text = drawStr;
-                    }
-                }
-                else
-                {
-                    if (game.GetPieceByRowCol((step.SrcCellRow, step.SrcCellCol)).Player == Game.Player.Client.ToString())
-                    {
-                        label1.Text = clientTurnStr;
-                    }
-                    else
-                    {
-                        label1.Text = serverTurnStr;
-                    }
-
-                }
-                
-                Invalidate();
-                Update();
+                UpdateLabel(step);
                 game.PerformStep(step);
                 RefreshPanel();
                 await WaitingPeriod();
