@@ -534,7 +534,6 @@ C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Players\Edit.cshtml.g.cs
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Players\Index.cshtml.g.cs
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Privacy.cshtml.g.cs
-C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Queries.cshtml.g.cs
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Shared\_Layout.cshtml.g.cs
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\Shared\_ValidationScriptsPartial.cshtml.g.cs
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\_ViewImports.cshtml.g.cs
@@ -548,3 +547,6 @@ C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\staticwebas
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Server.dll
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Server.pdb
 C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Server.genruntimeconfig.cache
+C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Server.csprojAssemblyReference.cache
+C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\CountGamesPerPlayer.cshtml.g.cs
+C:\Git\GitDotnet\Final\ServerSolution\Server\obj\Debug\netcoreapp3.1\Razor\Pages\GamesPerPlayer.cshtml.g.cs

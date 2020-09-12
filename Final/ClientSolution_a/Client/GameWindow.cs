@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,9 +19,10 @@ namespace Client
     public partial class GameWindow : Form
     {
         private HttpClient client;
-        private GamesDataContext db = new GamesDataContext();
-        private BindingSource TblStepsBindingSource = new BindingSource();
-        private string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Git\GitDotnet\Client\client_db.mdf;Integrated Security=True";
+        private static GamesDataContext db = new GamesDataContext();
+        private static BindingSource TblStepsBindingSource = new BindingSource();
+        public static BindingSource TblGamesBindingSource = new BindingSource();
+        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Git\GitDotnet\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security = True";
 
         //graphics details
         ////////////////////////////////////////
@@ -50,6 +52,8 @@ namespace Client
         static string emptyStr = "";
         static string topLabelStr = clientTurnStr;
         static string bottomLabelStr = "";
+        bool gameEnded = false;
+        string winner;
 
         public GameWindow(Game g)
         {
@@ -58,9 +62,11 @@ namespace Client
             InitializeComponent();
             GameWindow_Load();
         }
+
         private void GameWindow_Load()
         {
             TblStepsBindingSource.DataSource = db.TblSteps;
+            TblGamesBindingSource.DataSource = db.TblGames;
 
             client = Program.client;
             this.DoubleBuffered = true;
@@ -88,71 +94,70 @@ namespace Client
         }
         private void panel1_MouseUp(object sender, MouseEventArgs e)
         {
-            if (dragging)
+            if (dragging && !gameEnded)
             {
+                //stop dragging and create step
                 dragging = false;
                 Point dropLocation = e.Location;
-                Step step = CreateStep(dropLocation);
-
-                if (step == null)
+                Step clientStep = CreateValidMoveFromDragg(dropLocation);
+                if (clientStep == null)
                 {
                     bottomLabelStr = unvalidStepStr;
-                }
-                else
-                {
-                    bottomLabelStr = emptyStr;
-                    //update game
-                    game.PerformStep(step);
-                    //add step to db
-                    //SaveStep(step);
                     //update panel
                     RefreshPanel();
-                    //check end game
-                    string endGame = game.CheckEndGame();
-                    if (endGame != "")
-                    {
-                        EndGame(endGame);
-                    }
-                    
+                    return;
+                }
+
+                // valid client step
+                bottomLabelStr = emptyStr;
+                //update panel
+                RefreshPanel();
+                //update game
+                game.PerformStep(clientStep);
+                //add step to db
+                SaveStep(clientStep,Game.Player.Client.ToString());
+                //update panel
+                RefreshPanel();
+                if (clientStep.EndGameResult != "")
+                {
+                    EndGame(clientStep.EndGameResult);
+                }
+               
+                else
+                {
+                    // server turn
                     game.Turn = Game.Player.Server.ToString();
                     topLabelStr = serverTurnStr;
-                    //post step to server
-                    Step serverStep = getServerStep(step);
+                    RefreshPanel();
+                    //Thread.Sleep(2000); // to see server step
+                    //post step to server and get server step
+                    Step serverStep = getServerStep(clientStep);
                     //update game
                     game.PerformStep(serverStep);
                     //add step to db
-                    //SaveStep(serverStep);
-                    //check end game
-                    endGame = game.CheckEndGame();
-                    if(endGame != "")
-                    {
-                        EndGame(endGame);
-                    }
-                    else
-                    {
-                        game.Turn = Game.Player.Client.ToString();
-                        topLabelStr = clientTurnStr;
-                    }
-                    
-                }
-                //update panel
-                RefreshPanel();
+                    SaveStep(serverStep,Game.Player.Server.ToString());
+                    //update panel
 
+                    RefreshPanel();
+                    if (serverStep.EndGameResult != "")
+                    {
+                        EndGame(serverStep.EndGameResult);
+                    }
+                    topLabelStr = clientTurnStr;
+                    RefreshPanel();
+                    game.Turn = Game.Player.Client.ToString();
+                }
             }
         }
+
         private Step getServerStep(Step step)
         {
             Step serverStep = PostStepToServerAsync(step);
             if (serverStep == null)
             {
-                serverStep = PostStepToServerAsync(step);
-                if (serverStep == null)
-                {
-                    throw new Exception("Couldnt retreive step from server");
-                }
+                throw new Exception("Couldnt retreive step from server");
             }
             return serverStep;
-            
         }
   
         private  Step PostStepToServerAsync(Step step)
@@ -177,7 +182,7 @@ namespace Client
 
         private void panel1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && game.Turn == Game.Player.Client.ToString())
+            if (e.Button == MouseButtons.Left && game.Turn == Game.Player.Client.ToString() && !gameEnded)
             {
                 if (dragging) // middle of dragging action
                 {
@@ -282,14 +287,40 @@ namespace Client
             }
             return null;
         }
-        private Step CreateStep(Point dropLocation)
+
+        private Step CreateValidMoveFromDragg(Point dropLocation)
         {
             Cell targetCell = GetCellFromLocation(dropLocation);
 
             if (targetCell == null)
                 return null;
+            
+            Piece piece = game.GetPieceByRowCol((draggSrcCell.Row, draggSrcCell.Col));
+            List<Step> stepOptions = new List<Step>();
 
+            game.StepOptions(piece, ref stepOptions);
+            
+            if(stepOptions.Count == 0)
+            {
+                return null;
+            }
+
+            foreach(Step step in stepOptions)
+            {
+                if(step.DstCellRow == targetCell.Row && step.DstCellCol == targetCell.Col)
+                {
+                    return step;
+                }
+            }
+            
+            return null;
+        }
+       
+        private Step CreateStepFromDragg(Point dropLocation)
+        {
+            Cell targetCell = GetCellFromLocation(dropLocation);
             List<Step> steps = game.AllStepOptionsForPlayer(Game.Player.Client.ToString());
+           
             foreach(Step step in steps)
             {
                 if(step.DstCellRow == targetCell.Row && step.DstCellCol == targetCell.Col &&
@@ -301,15 +332,16 @@ namespace Client
 
             return null;
         }
+
         private bool IsInPieceArea(Piece piece, Point location)
         {
             Point pieceCenterPoint = PieceCenterPoint(piece);
             double dis = Math.Sqrt(Math.Pow(location.X - pieceCenterPoint.X, 2) + Math.Pow(location.Y - pieceCenterPoint.Y, 2));
             return dis < pieceRadius;
         }
-        private void SaveStep(Step step)
+        private void SaveStep(Step step,string player)
         {
-            string query = "INSERT INTO db.TblSteps (SrcCellRow,SrcCellCol,DstCellRow,DstCellCol,PieceToRemoveRow,PieceToRemoveCol) VALUES (@SrcCellRow,@SrcCellCol,@DstCellRow,@DstCellCol,@PieceToRemoveRow,@PieceToRemoveCol)";
+            string query = "INSERT INTO dbo.TblSteps (SrcCellRow,SrcCellCol,DstCellRow,DstCellCol,PieceToRemoveRow,PieceToRemoveCol,EndGameResult,Player,GameId) VALUES (@SrcCellRow,@SrcCellCol,@DstCellRow,@DstCellCol,@PieceToRemoveRow,@PieceToRemoveCol,@EndGameResult,@Player,@GameId)";
             SqlConnection connection = new SqlConnection(connectionString);
             SqlCommand command = new SqlCommand(query, connection);
           
@@ -319,6 +351,9 @@ namespace Client
             command.Parameters.Add("@DstCellCol", System.Data.SqlDbType.Int);
             command.Parameters.Add("@PieceToRemoveRow", System.Data.SqlDbType.Int);
             command.Parameters.Add("@PieceToRemoveCol", System.Data.SqlDbType.Int);
+            command.Parameters.Add("@EndGameResult", System.Data.SqlDbType.NChar);
+            command.Parameters.Add("@Player", System.Data.SqlDbType.NChar);
+            command.Parameters.Add("@GameId", System.Data.SqlDbType.Int);
 
             command.Parameters["@SrcCellRow"].Value = step.SrcCellRow;
             command.Parameters["@SrcCellCol"].Value = step.SrcCellCol;
@@ -326,31 +361,67 @@ namespace Client
             command.Parameters["@DstCellCol"].Value = step.DstCellCol;
             command.Parameters["@PieceToRemoveRow"].Value = step.PieceToRemoveRow;
             command.Parameters["@PieceToRemoveCol"].Value = step.PieceToRemoveCol;
+            if(step.EndGameResult == "")
+            {
+                command.Parameters["@EndGameResult"].Value = "none";
+            }
+            else
+            {
+                command.Parameters["@EndGameResult"].Value = step.EndGameResult;
+            }
+            command.Parameters["@Player"].Value = player;
+            command.Parameters["@GameId"].Value = game.TblGame.Id;
 
             connection.Open();
             command.ExecuteNonQuery();
-            //SqlDataReader reader = command.ExecuteReader();
-
-            //TblStepsBindingSource.DataSource = reader;
             connection.Close();
-            
+
         }
         private void EndGame(string endGameStr)
         {
             if (endGameStr == Game.EndGame.ClientWinner.ToString())
             {
                 topLabelStr = clientWinStr;
+                winner = "Client";
             }
             else if (endGameStr == Game.EndGame.ServerWinner.ToString())
             {
                 topLabelStr = clientLostStr;
+                winner = "Server";
             }
             else if (endGameStr == Game.EndGame.Draw.ToString())
             {
                 topLabelStr = drawStr;
+                winner = "Draw";
             }
 
+            
             RefreshPanel();
+            gameEnded = true;
+          
+            //save game
+            SaveGame();
+        }
+
+        private void SaveGame()
+        {
+
+            string query = "INSERT INTO dbo.TblGames (GameId,Date,Winner) VALUES (@GameId,@Date,@Winner)";
+            SqlConnection connection = new SqlConnection(connectionString);
+            SqlCommand command = new SqlCommand(query, connection);
+
+            command.Parameters.Add("@GameId", System.Data.SqlDbType.Int);
+            command.Parameters.Add("@Date", System.Data.SqlDbType.DateTime);
+            command.Parameters.Add("@Winner", System.Data.SqlDbType.NChar);
+
+            command.Parameters["@GameId"].Value = game.TblGame.Id;
+            command.Parameters["@Date"].Value = game.TblGame.Date;
+            command.Parameters["@Winner"].Value = winner;
+
+            connection.Open();
+            command.ExecuteNonQuery();
+
+            connection.Close();
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -359,6 +430,11 @@ namespace Client
         }
 
         private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void GameWindow_Load(object sender, EventArgs e)
         {
 
         }

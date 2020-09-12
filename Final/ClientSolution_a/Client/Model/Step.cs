@@ -14,8 +14,9 @@ namespace Client.Model
         public int DstCellRow { get; set; }
         public int PieceToRemoveRow { get; set; }
         public int PieceToRemoveCol { get; set; }
+        public string EndGameResult { get; set; }
 
-        public Step(int srcCellRow, int srcCellCol, int dstCellRow, int dstCellCol, int pieceToRemoveRow = -1, int pieceToRemoveCol = -1)
+        public Step(int srcCellRow, int srcCellCol, int dstCellRow, int dstCellCol,int pieceToRemoveRow = -1,int pieceToRemoveCol = -1,string endGameResult = "")
         {
             SrcCellCol = srcCellCol;
             SrcCellRow = srcCellRow;
@@ -23,6 +24,7 @@ namespace Client.Model
             DstCellRow = dstCellRow;
             PieceToRemoveRow = pieceToRemoveRow;
             PieceToRemoveCol = pieceToRemoveCol;
+            EndGameResult = endGameResult;
 
         }
     }

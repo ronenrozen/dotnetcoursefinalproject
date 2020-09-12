@@ -91,11 +91,11 @@ namespace Server.Api
 
         [Route("step/{gameId}/{SrcCellCol}/{SrcCellRow}/{PieceToRemoveCol}/{PieceToRemoveRow}/{DstCellCol}/{DstCellRow}")]
         [HttpGet] //get new game request and create game
-        public ActionResult<Step> PostStepToServer(int gameId, int SrcCellCol, int SrcCellRow, int DstCellCol, int DstCellRow, int PieceToRemoveRow, int PieceToRemoveCol)
+        public ActionResult<Step> PostStepToServer(int gameId, int SrcCellCol, int SrcCellRow, int DstCellCol, int DstCellRow, int PieceToRemoveRow, int PieceToRemoveCol, string endGameResult)
         {
             Game currentGame = games.Find(g => g.TblGame.Id == gameId);
-            Step step = new Step(SrcCellRow, SrcCellCol, DstCellRow, DstCellCol, PieceToRemoveRow, PieceToRemoveCol);
-            currentGame.PerformStep(step);
+            Step clientStep = new Step(SrcCellRow, SrcCellCol, DstCellRow, DstCellCol, PieceToRemoveRow, PieceToRemoveCol, endGameResult);
+            currentGame.PerformStep(clientStep);
             Step serverStep = currentGame.GetRandomStep(Game.Player.Server.ToString());
             currentGame.PerformStep(serverStep);
             return serverStep;
