@@ -17,7 +17,7 @@ namespace Client
         private GamesDataContext db = new GamesDataContext();
         private BindingSource TblGamesBindingSource = new BindingSource();
         public static DataGridViewRow selectedRow = null;
-        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\rrozen\source\repos\FinalProjectDotNet\dotnetcoursefinalproject\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
+        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Git\GitDotnet\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
         public int thePlayerId;
 
         public RestoreGameMenu(int playerId)
@@ -29,14 +29,24 @@ namespace Client
         private void RestoreGameMenu_Load(object sender, EventArgs e)
         {
             TblGamesBindingSource.DataSource = db.TblGames;
-            TblGamesDataGridView.DataSource = TblGamesBindingSource;
+            SelectAllGames();
+           // TblGamesDataGridView.DataSource = TblGamesBindingSource;
+            
         }
 
         private void SelectAllGames()
         {
 
             string query = $"SELECT * FROM dbo.TblGames WHERE PlayerId = {thePlayerId}";
-            SqlConnection connection = new SqlConnection(GameWindow.connectionString);
+            SqlConnection connection = new SqlConnection(connectionString);
+            var dataAdapter = new SqlDataAdapter(query, connection);
+
+            var commandBuilder = new SqlCommandBuilder(dataAdapter);
+            var ds = new DataSet();
+            dataAdapter.Fill(ds);
+            TblGamesDataGridView.ReadOnly = true;
+            TblGamesDataGridView.DataSource = ds.Tables[0];
+            /*
             connection.Open();
             SqlCommand command = new SqlCommand(query, connection);
             command.ExecuteNonQuery();
@@ -44,7 +54,10 @@ namespace Client
             SqlDataReader reader = command.ExecuteReader();
 
             TblGamesDataGridView.DataSource = reader;
+            TblGamesDataGridView.Update();
+            TblGamesDataGridView.Refresh();
             connection.Close();
+            */
         }
 
         private void label1_Click(object sender, EventArgs e)

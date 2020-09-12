@@ -22,7 +22,7 @@ namespace Client
         private static GamesDataContext db = new GamesDataContext();
         private static BindingSource TblStepsBindingSource = new BindingSource();
         public static BindingSource TblGamesBindingSource = new BindingSource();
-        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\rrozen\source\repos\FinalProjectDotNet\dotnetcoursefinalproject\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
+        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Git\GitDotnet\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
 
         //graphics details
         ////////////////////////////////////////
@@ -60,6 +60,7 @@ namespace Client
             game = new Game(g.TblGame);
             game.Turn = Game.Player.Client.ToString();
             InitializeComponent();
+            topLabelStr = clientTurnStr;
             GameWindow_Load();
         }
 
@@ -406,17 +407,19 @@ namespace Client
         private void SaveGame()
         {
 
-            string query = "INSERT INTO dbo.TblGames (GameId,Date,Winner) VALUES (@GameId,@Date,@Winner)";
+            string query = "INSERT INTO dbo.TblGames (GameId,Date,Winner,PlayerId) VALUES (@GameId,@Date,@Winner,@PlayerId)";
             SqlConnection connection = new SqlConnection(connectionString);
             SqlCommand command = new SqlCommand(query, connection);
 
             command.Parameters.Add("@GameId", System.Data.SqlDbType.Int);
             command.Parameters.Add("@Date", System.Data.SqlDbType.DateTime);
             command.Parameters.Add("@Winner", System.Data.SqlDbType.NChar);
+            command.Parameters.Add("@PlayerId", System.Data.SqlDbType.Int);
 
             command.Parameters["@GameId"].Value = game.TblGame.Id;
             command.Parameters["@Date"].Value = game.TblGame.Date;
             command.Parameters["@Winner"].Value = winner;
+            command.Parameters["@PlayerId"].Value = game.TblGame.Pid;
 
             connection.Open();
             command.ExecuteNonQuery();
