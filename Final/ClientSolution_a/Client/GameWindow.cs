@@ -22,7 +22,7 @@ namespace Client
         private static GamesDataContext db = new GamesDataContext();
         private static BindingSource TblStepsBindingSource = new BindingSource();
         public static BindingSource TblGamesBindingSource = new BindingSource();
-        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Git\GitDotnet\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security = True";
+        public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\rrozen\source\repos\FinalProjectDotNet\dotnetcoursefinalproject\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
 
         //graphics details
         ////////////////////////////////////////

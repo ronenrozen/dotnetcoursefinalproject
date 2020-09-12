@@ -44,7 +44,7 @@ namespace Client
         static string clientWinStr = "You Win!! Game Ended";
         static string clientLostStr = "You Lost ): Game Ended";
 
-        int delaySec = 1;
+        int delaySec = 1000;
         List<Step> steps;
 
         public RestorWindow(Game g)
@@ -61,7 +61,7 @@ namespace Client
 
         private void button2_Click(object sender, EventArgs e)
         {
-            delaySec = 1;
+            delaySec = 1000;
         }
 
         private void RestorWindow_Load()
@@ -72,7 +72,7 @@ namespace Client
             label1.Text = "";
         }
 
-        private void StartPerformSteps()
+        private async void StartPerformSteps()
         {
             foreach(Step step in steps)
             {
@@ -109,7 +109,7 @@ namespace Client
                 Update();
                 game.PerformStep(step);
                 RefreshPanel();
-                Thread.Sleep(delaySec*1000);
+                await WaitingPeriod();
             }
         }
 
@@ -164,7 +164,7 @@ namespace Client
 
         private void button1_Click(object sender, EventArgs e)
         {
-            delaySec = 3;
+            delaySec = 3000;
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -223,6 +223,16 @@ namespace Client
         private void button3_Click(object sender, EventArgs e)
         {
             StartPerformSteps();
+        }
+
+        private void RestorWindow_Load(object sender, EventArgs e)
+        {
+
+        }
+        private async Task<int> WaitingPeriod()
+        {
+            await Task.Delay(delaySec);
+            return 1;
         }
     }
 }

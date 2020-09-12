@@ -98,6 +98,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "RestorWindow";
             this.Text = "RestorWindow";
+            this.Load += new System.EventHandler(this.RestorWindow_Load);
             this.ResumeLayout(false);
 
         }

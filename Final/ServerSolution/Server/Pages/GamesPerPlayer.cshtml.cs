@@ -28,10 +28,7 @@ namespace Server.Pages
         {
            
             TblPlayers = await _context.TblPlayers.ToListAsync();
-        }
-
-
-       
+        }    
      
     }
 }
