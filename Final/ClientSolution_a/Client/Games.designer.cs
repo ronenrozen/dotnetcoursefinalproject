@@ -30,12 +30,12 @@ namespace Client
 		
     #region Extensibility Method Definitions
     partial void OnCreated();
-    partial void InsertTblGame(TblGame instance);
-    partial void UpdateTblGame(TblGame instance);
-    partial void DeleteTblGame(TblGame instance);
     partial void InsertTblStep(TblStep instance);
     partial void UpdateTblStep(TblStep instance);
     partial void DeleteTblStep(TblStep instance);
+    partial void InsertTblGame(TblGame instance);
+    partial void UpdateTblGame(TblGame instance);
+    partial void DeleteTblGame(TblGame instance);
     #endregion
 		
 		public GamesDataContext() : 
@@ -68,14 +68,6 @@ namespace Client
 			OnCreated();
 		}
 		
-		public System.Data.Linq.Table<TblGame> TblGames
-		{
-			get
-			{
-				return this.GetTable<TblGame>();
-			}
-		}
-		
 		public System.Data.Linq.Table<TblStep> TblSteps
 		{
 			get
@@ -83,90 +75,12 @@ namespace Client
 				return this.GetTable<TblStep>();
 			}
 		}
-	}
-	
-	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.TblGames")]
-	public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
-	{
 		
-		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
-		
-		private int _Id;
-		
-		private System.DateTime _Date;
-		
-    #region Extensibility Method Definitions
-    partial void OnLoaded();
-    partial void OnValidate(System.Data.Linq.ChangeAction action);
-    partial void OnCreated();
-    partial void OnIdChanging(int value);
-    partial void OnIdChanged();
-    partial void OnDateChanging(System.DateTime value);
-    partial void OnDateChanged();
-    #endregion
-		
-		public TblGame()
-		{
-			OnCreated();
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
-		public int Id
+		public System.Data.Linq.Table<TblGame> TblGames
 		{
 			get
 			{
-				return this._Id;
-			}
-			set
-			{
-				if ((this._Id != value))
-				{
-					this.OnIdChanging(value);
-					this.SendPropertyChanging();
-					this._Id = value;
-					this.SendPropertyChanged("Id");
-					this.OnIdChanged();
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Date", DbType="DateTime NOT NULL")]
-		public System.DateTime Date
-		{
-			get
-			{
-				return this._Date;
-			}
-			set
-			{
-				if ((this._Date != value))
-				{
-					this.OnDateChanging(value);
-					this.SendPropertyChanging();
-					this._Date = value;
-					this.SendPropertyChanged("Date");
-					this.OnDateChanged();
-				}
-			}
-		}
-		
-		public event PropertyChangingEventHandler PropertyChanging;
-		
-		public event PropertyChangedEventHandler PropertyChanged;
-		
-		protected virtual void SendPropertyChanging()
-		{
-			if ((this.PropertyChanging != null))
-			{
-				this.PropertyChanging(this, emptyChangingEventArgs);
-			}
-		}
-		
-		protected virtual void SendPropertyChanged(String propertyName)
-		{
-			if ((this.PropertyChanged != null))
-			{
-				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+				return this.GetTable<TblGame>();
 			}
 		}
 	}
@@ -187,9 +101,15 @@ namespace Client
 		
 		private int _DstCellCol;
 		
-		private System.Nullable<int> _PieceToRemoveRow;
+		private int _PieceToRemoveRow;
 		
-		private System.Nullable<int> _PieceToRemoveCol;
+		private int _PieceToRemoveCol;
+		
+		private string _EndGameResult;
+		
+		private string _Player;
+		
+		private int _GameId;
 		
     #region Extensibility Method Definitions
     partial void OnLoaded();
@@ -205,10 +125,16 @@ namespace Client
     partial void OnDstCellRowChanged();
     partial void OnDstCellColChanging(int value);
     partial void OnDstCellColChanged();
-    partial void OnPieceToRemoveRowChanging(System.Nullable<int> value);
+    partial void OnPieceToRemoveRowChanging(int value);
     partial void OnPieceToRemoveRowChanged();
-    partial void OnPieceToRemoveColChanging(System.Nullable<int> value);
+    partial void OnPieceToRemoveColChanging(int value);
     partial void OnPieceToRemoveColChanged();
+    partial void OnEndGameResultChanging(string value);
+    partial void OnEndGameResultChanged();
+    partial void OnPlayerChanging(string value);
+    partial void OnPlayerChanged();
+    partial void OnGameIdChanging(int value);
+    partial void OnGameIdChanged();
     #endregion
 		
 		public TblStep()
@@ -316,8 +242,8 @@ namespace Client
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveRow", DbType="Int")]
-		public System.Nullable<int> PieceToRemoveRow
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveRow", DbType="Int NOT NULL")]
+		public int PieceToRemoveRow
 		{
 			get
 			{
@@ -336,8 +262,8 @@ namespace Client
 			}
 		}
 		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveCol", DbType="Int")]
-		public System.Nullable<int> PieceToRemoveCol
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_PieceToRemoveCol", DbType="Int NOT NULL")]
+		public int PieceToRemoveCol
 		{
 			get
 			{
@@ -352,6 +278,200 @@ namespace Client
 					this._PieceToRemoveCol = value;
 					this.SendPropertyChanged("PieceToRemoveCol");
 					this.OnPieceToRemoveColChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_EndGameResult", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string EndGameResult
+		{
+			get
+			{
+				return this._EndGameResult;
+			}
+			set
+			{
+				if ((this._EndGameResult != value))
+				{
+					this.OnEndGameResultChanging(value);
+					this.SendPropertyChanging();
+					this._EndGameResult = value;
+					this.SendPropertyChanged("EndGameResult");
+					this.OnEndGameResultChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Player", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Player
+		{
+			get
+			{
+				return this._Player;
+			}
+			set
+			{
+				if ((this._Player != value))
+				{
+					this.OnPlayerChanging(value);
+					this.SendPropertyChanging();
+					this._Player = value;
+					this.SendPropertyChanged("Player");
+					this.OnPlayerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_GameId", DbType="Int NOT NULL")]
+		public int GameId
+		{
+			get
+			{
+				return this._GameId;
+			}
+			set
+			{
+				if ((this._GameId != value))
+				{
+					this.OnGameIdChanging(value);
+					this.SendPropertyChanging();
+					this._GameId = value;
+					this.SendPropertyChanged("GameId");
+					this.OnGameIdChanged();
+				}
+			}
+		}
+		
+		public event PropertyChangingEventHandler PropertyChanging;
+		
+		public event PropertyChangedEventHandler PropertyChanged;
+		
+		protected virtual void SendPropertyChanging()
+		{
+			if ((this.PropertyChanging != null))
+			{
+				this.PropertyChanging(this, emptyChangingEventArgs);
+			}
+		}
+		
+		protected virtual void SendPropertyChanged(String propertyName)
+		{
+			if ((this.PropertyChanged != null))
+			{
+				this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.TblGames")]
+	public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
+	{
+		
+		private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+		
+		private int _GameId;
+		
+		private System.DateTime _Date;
+		
+		private string _Winner;
+		
+		private int _Id;
+		
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnGameIdChanging(int value);
+    partial void OnGameIdChanged();
+    partial void OnDateChanging(System.DateTime value);
+    partial void OnDateChanged();
+    partial void OnWinnerChanging(string value);
+    partial void OnWinnerChanged();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    #endregion
+		
+		public TblGame()
+		{
+			OnCreated();
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_GameId", DbType="Int NOT NULL")]
+		public int GameId
+		{
+			get
+			{
+				return this._GameId;
+			}
+			set
+			{
+				if ((this._GameId != value))
+				{
+					this.OnGameIdChanging(value);
+					this.SendPropertyChanging();
+					this._GameId = value;
+					this.SendPropertyChanged("GameId");
+					this.OnGameIdChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Date", DbType="DateTime NOT NULL")]
+		public System.DateTime Date
+		{
+			get
+			{
+				return this._Date;
+			}
+			set
+			{
+				if ((this._Date != value))
+				{
+					this.OnDateChanging(value);
+					this.SendPropertyChanging();
+					this._Date = value;
+					this.SendPropertyChanged("Date");
+					this.OnDateChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Winner", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Winner
+		{
+			get
+			{
+				return this._Winner;
+			}
+			set
+			{
+				if ((this._Winner != value))
+				{
+					this.OnWinnerChanging(value);
+					this.SendPropertyChanging();
+					this._Winner = value;
+					this.SendPropertyChanged("Winner");
+					this.OnWinnerChanged();
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+		public int Id
+		{
+			get
+			{
+				return this._Id;
+			}
+			set
+			{
+				if ((this._Id != value))
+				{
+					this.OnIdChanging(value);
+					this.SendPropertyChanging();
+					this._Id = value;
+					this.SendPropertyChanged("Id");
+					this.OnIdChanged();
 				}
 			}
 		}

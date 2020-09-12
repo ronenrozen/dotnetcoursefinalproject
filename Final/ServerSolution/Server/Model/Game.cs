@@ -12,7 +12,7 @@ namespace Server.Model
         static Random rnd = new Random();
         public static int gridRows = 8;
         public static int gridCols = 4;
-        public List<(int, int)> blackPiecesRowCol = new List<(int, int)> { (0, 0), (1, 1), (0, 2), (1, 3) };
+        public List<(int, int)> blackPiecesRowCol = new List<(int, int)> { (1, 0), (0, 1), (1, 2), (0, 3) };
         public List<(int, int)> bluePiecesRowCol = new List<(int, int)> { (7, 0), (6, 1), (7, 2), (6, 3) };
 
         public enum EndGame
@@ -27,7 +27,10 @@ namespace Server.Model
             MoveLeft,
             MoveRight,
             EatRight,
-            EatLeft
+            EatLeft,
+            CantMove,
+            EndGame
+
         }
 
         public enum Player
@@ -111,24 +114,62 @@ namespace Server.Model
                 (int, int) topLeft2 = (srcCellRow - 2, srcCellCol - 2);
 
                 //MoveRight
+                string endGame = "";
                 if (EmptyCell(topRight))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topRight.Item1, topRight.Item2));
+                    if (topRight.Item1 == 0)
+                    {
+                        endGame = Game.EndGame.ClientWinner.ToString();
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topRight.Item1, topRight.Item2, -1, -1, endGame));
                 }
                 //MoveLeft
+                endGame = "";
                 if (EmptyCell(topLeft))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topLeft.Item1, topLeft.Item2));
+                    if (topLeft.Item1 == 0)
+                    {
+                        endGame = Game.EndGame.ClientWinner.ToString();
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topLeft.Item1, topLeft.Item2, -1, -1, endGame));
                 }
                 //EatRight
+                endGame = "";
                 if (EmptyCell(topRight2) && PlayerInCell(Player.Server.ToString(), topRight))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topRight2.Item1, topRight2.Item2, topRight.Item1, topRight.Item2));
+                    if (topRight2.Item1 == 0)
+                    {
+                        endGame = Game.EndGame.ClientWinner.ToString();
+                    }
+
+                    else
+                    {
+                        List<Piece> serverPieces = Pieces.FindAll(p => p.Player == Player.Server.ToString());
+                        if (serverPieces.Count == 1 && serverPieces[0].Row == topRight.Item1 && serverPieces[0].Col == topRight.Item2)
+                        {
+                            endGame = Game.EndGame.ClientWinner.ToString();
+                        }
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topRight2.Item1, topRight2.Item2, topRight.Item1, topRight.Item2, endGame));
                 }
                 //EatLeft
+                endGame = "";
                 if (EmptyCell(topLeft2) && PlayerInCell(Player.Server.ToString(), topLeft))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topLeft2.Item1, topLeft2.Item2, topLeft.Item1, topLeft.Item2));
+                    if (topLeft2.Item1 == 0)
+                    {
+                        endGame = Game.EndGame.ClientWinner.ToString();
+                    }
+
+                    else
+                    {
+                        List<Piece> serverPieces = Pieces.FindAll(p => p.Player == Player.Server.ToString());
+                        if (serverPieces.Count == 1 && serverPieces[0].Row == topLeft.Item1 && serverPieces[0].Col == topLeft.Item2)
+                        {
+                            endGame = Game.EndGame.ClientWinner.ToString();
+                        }
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, topLeft2.Item1, topLeft2.Item2, topLeft.Item1, topLeft.Item2, endGame));
                 }
             }
             else
@@ -140,28 +181,66 @@ namespace Server.Model
                 (int, int) downLeft2 = (srcCellRow + 2, srcCellCol + 2);
 
                 //MoveRight
+                string endGame = "";
                 if (EmptyCell(downRight))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight.Item1, downRight.Item2));
+                    if (downRight.Item1 == 7)
+                    {
+                        endGame = Game.EndGame.ServerWinner.ToString();
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight.Item1, downRight.Item2, -1, -1, endGame));
                 }
                 //MoveLeft
+                endGame = "";
                 if (EmptyCell(downLeft))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft.Item1, downLeft.Item2));
+                    if (downLeft.Item1 == 7)
+                    {
+                        endGame = Game.EndGame.ServerWinner.ToString();
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft.Item1, downLeft.Item2, -1, -1, endGame));
                 }
                 //EatRight
+                endGame = "";
                 if (EmptyCell(downRight2) && PlayerInCell(Player.Client.ToString(), downRight))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight2.Item1, downRight2.Item2, downRight.Item1, downRight.Item2));
+                    if (downRight2.Item1 == 7)
+                    {
+                        endGame = Game.EndGame.ServerWinner.ToString();
+                    }
+
+                    else
+                    {
+                        List<Piece> clientPieces = Pieces.FindAll(p => p.Player == Player.Client.ToString());
+                        if (clientPieces.Count == 1 && clientPieces[0].Row == downRight.Item1 && clientPieces[0].Col == downRight.Item2)
+                        {
+                            endGame = Game.EndGame.ServerWinner.ToString();
+                        }
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downRight2.Item1, downRight2.Item2, downRight.Item1, downRight.Item2, endGame));
                 }
                 //EatLeft
+                endGame = "";
                 if (EmptyCell(downLeft2) && PlayerInCell(Player.Client.ToString(), downLeft))
                 {
-                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft2.Item1, downLeft2.Item2, downLeft.Item1, downLeft.Item2));
+                    if (downLeft2.Item1 == 7)
+                    {
+                        endGame = Game.EndGame.ServerWinner.ToString();
+                    }
+                    else
+                    {
+                        List<Piece> clientPieces = Pieces.FindAll(p => p.Player == Player.Client.ToString());
+                        if (clientPieces.Count == 1 && clientPieces[0].Row == downLeft.Item1 && clientPieces[0].Col == downLeft.Item2)
+                        {
+                            endGame = Game.EndGame.ServerWinner.ToString();
+                        }
+                    }
+                    stepOptions.Add(new Step(srcCellRow, srcCellCol, downLeft2.Item1, downLeft2.Item2, downLeft.Item1, downLeft.Item2, endGame));
                 }
             }
 
         }
+
         public bool PlayerInCell(string player, (int, int) rowCol)
         {
             return RowColInBound(rowCol) && Cells[rowCol.Item1, rowCol.Item2].State == player;
@@ -191,6 +270,7 @@ namespace Server.Model
 
             return stepOptions;
         }
+
         public Piece GetPieceByRowCol((int, int) rowCol)
         {
             foreach (Piece piece in Pieces)
@@ -205,14 +285,19 @@ namespace Server.Model
         }
         public void PerformStep(Step step)
         {
+            //update moved piece
             Piece piece = GetPieceByRowCol((step.SrcCellRow, step.SrcCellCol));
-            Cells[step.SrcCellRow, step.SrcCellCol].State = CellState.Empty.ToString();
-            Cells[step.DstCellRow, step.DstCellCol].State = piece.Player.ToString();
             piece.Row = step.DstCellRow;
             piece.Col = step.DstCellCol;
+
+            //update src and dst cell
+            Cells[step.SrcCellRow, step.SrcCellCol].State = CellState.Empty.ToString();
+            Cells[step.DstCellRow, step.DstCellCol].State = piece.Player.ToString();
+
+            //remove eaten piece and update her cell
             if (step.PieceToRemoveCol != -1 && step.PieceToRemoveRow != -1)
             {
-                Cells[step.PieceToRemoveRow, step.PieceToRemoveCol].State = piece.Player.ToString();
+                Cells[step.PieceToRemoveRow, step.PieceToRemoveCol].State = Game.CellState.Empty.ToString();
                 Pieces.RemoveAll(p => p.Row == step.PieceToRemoveRow && p.Col == step.PieceToRemoveCol);
             }
         }
@@ -221,29 +306,6 @@ namespace Server.Model
             List<Step> steps = AllStepOptionsForPlayer(player);
             int index = rnd.Next(steps.Count);
             return steps[index];
-        }
-        public string CheckEndGame()
-        {
-            foreach (Piece piece in Pieces)
-            {
-                if (piece.Player == Player.Client.ToString() && piece.Row == 0)
-                {
-                    return EndGame.ClientWinner.ToString();
-                }
-                else if (piece.Player == Player.Server.ToString() && piece.Row == 7)
-                {
-                    return EndGame.ServerWinner.ToString();
-                }
-            }
-
-            if (AllStepOptionsForPlayer(Player.Server.ToString()).Count == 0 &&
-                AllStepOptionsForPlayer(Player.Client.ToString()).Count == 0)
-            {
-                return EndGame.Draw.ToString();
-            }
-
-            return "";
-
         }
     }
 }
