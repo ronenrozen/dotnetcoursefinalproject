@@ -18,9 +18,11 @@ namespace Client
         private BindingSource TblGamesBindingSource = new BindingSource();
         public static DataGridViewRow selectedRow = null;
         public static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\rrozen\source\repos\FinalProjectDotNet\dotnetcoursefinalproject\Final\ClientSolution_a\Client\client_db.mdf;Integrated Security=True";
+        public int thePlayerId;
 
-        public RestoreGameMenu()
+        public RestoreGameMenu(int playerId)
         {
+            thePlayerId = playerId;
             InitializeComponent();
         }
 
@@ -33,7 +35,7 @@ namespace Client
         private void SelectAllGames()
         {
 
-            string query = $"SELECT * FROM dbo.TblGames";
+            string query = $"SELECT * FROM dbo.TblGames WHERE PlayerId = {thePlayerId}";
             SqlConnection connection = new SqlConnection(GameWindow.connectionString);
             connection.Open();
             SqlCommand command = new SqlCommand(query, connection);
